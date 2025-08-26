@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <string name="app_name">Neuropulse</string>
+    <string name="grant_usage">Grant Usage Access</string>
+    <string name="last_spike">Last Spike: None</string>
+    <string name="start_monitoring">Start Monitoring</string>
+    <string name="status_idle">Status: Idle</string>
+    <string name="status_monitoring">Status: Monitoring…</string>
+    <string name="stop_monitoring">Stop Monitoring</string>
+    <style name="Theme.Neuropulse" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
+    </style>
+</resources>

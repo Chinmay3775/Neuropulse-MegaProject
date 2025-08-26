@@ -1,0 +1,4 @@
+com.neuropulse.app.test.app-androidTest-0 D:\Neuropulse2\app\build\generated\res\resValues\androidTest\debug
+com.neuropulse.app.test.app-mergeDebugAndroidTestResources-1 D:\Neuropulse2\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.neuropulse.app.test.app-mergeDebugAndroidTestResources-2 D:\Neuropulse2\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.neuropulse.app.test.app-debugAndroidTest-3 D:\Neuropulse2\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources

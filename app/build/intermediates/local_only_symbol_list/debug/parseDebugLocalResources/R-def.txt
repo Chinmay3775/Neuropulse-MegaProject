@@ -1,0 +1,21 @@
+R_DEF: Internal format may change without notice
+local
+color purple_500
+color purple_700
+color teal_200
+drawable ic_launcher_background
+id startBtn
+id statusText
+id stopBtn
+layout activity_main
+mipmap ic_launcher
+mipmap ic_launcher_foreground
+mipmap ic_launcher_round
+string app_name
+string grant_usage
+string last_spike
+string start_monitoring
+string status_idle
+string status_monitoring
+string stop_monitoring
+style Theme.Neuropulse
