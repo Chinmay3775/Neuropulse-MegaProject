@@ -1272,8 +1272,10 @@ color androidx_core_ripple_material_light
 color androidx_core_secondary_text_default_material_light
 color background_floating_material_dark
 color background_floating_material_light
+color background_light
 color background_material_dark
 color background_material_light
+color black
 color bright_foreground_disabled_material_dark
 color bright_foreground_disabled_material_light
 color bright_foreground_inverse_material_dark
@@ -1334,6 +1336,7 @@ color error_color_material_dark
 color error_color_material_light
 color foreground_material_dark
 color foreground_material_light
+color gray
 color highlighted_text_material_dark
 color highlighted_text_material_light
 color m3_appbar_overlay_color
@@ -2000,8 +2003,10 @@ color primary_text_default_material_dark
 color primary_text_default_material_light
 color primary_text_disabled_material_dark
 color primary_text_disabled_material_light
+color purple_200
 color purple_500
 color purple_700
+color red
 color ripple_material_dark
 color ripple_material_light
 color secondary_text_default_material_dark
@@ -2015,8 +2020,10 @@ color switch_thumb_material_light
 color switch_thumb_normal_material_dark
 color switch_thumb_normal_material_light
 color teal_200
+color teal_700
 color tooltip_background_dark
 color tooltip_background_light
+color white
 dimen abc_action_bar_content_inset_material
 dimen abc_action_bar_content_inset_with_nav
 dimen abc_action_bar_default_height_material
@@ -2932,6 +2939,8 @@ drawable ic_mtrl_checked_circle
 drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
+drawable ic_pause
+drawable ic_play_arrow
 drawable ic_search_black_24
 drawable indeterminate_static
 drawable m3_avd_hide_password
@@ -3097,6 +3106,8 @@ id beginning
 id blocking
 id bottom
 id bounce
+id btnStart
+id btnStop
 id buttonPanel
 id cancel_button
 id center
@@ -3208,6 +3219,7 @@ id indeterminate
 id info
 id invisible
 id inward
+id is_pooling_container_tag
 id italic
 id item_touch_helper_previous_elevation
 id jumpToEnd
@@ -3325,6 +3337,7 @@ id pathRelative
 id peekHeight
 id percent
 id pin
+id pooling_container_listener_holder_tag
 id position
 id postLayout
 id pressed
@@ -3341,6 +3354,7 @@ id right_icon
 id right_side
 id rounded
 id row_index_key
+id rvSessions
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
@@ -3387,15 +3401,12 @@ id src_in
 id src_over
 id standard
 id start
-id startBtn
 id startHorizontal
 id startToEnd
 id startVertical
 id staticLayout
 id staticPostLayout
-id statusText
 id stop
-id stopBtn
 id stretch
 id submenuarrow
 id submit_area
@@ -3435,6 +3446,7 @@ id titleDividerNoCustom
 id title_template
 id toggle
 id top
+id topAppBar
 id topPanel
 id touch_outside
 id transitionToEnd
@@ -3448,6 +3460,10 @@ id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
 id triangle
+id tvAddictionRisk
+id tvMostUsed
+id tvStatus
+id tvTotalTime
 id unchecked
 id uniform
 id unlabeled

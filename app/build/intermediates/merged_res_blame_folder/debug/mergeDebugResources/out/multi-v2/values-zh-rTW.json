@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.neuropulse.app-mergeDebugResources-29:/values-zh-rTW/values-zh-rTW.xml",
+            "outputFile": "com.neuropulse.app-mergeDebugResources-33:/values-zh-rTW/values-zh-rTW.xml",
             "map": [
                 {
                     "source": "C:\\Users\\HP\\.gradle\\caches\\8.10.2\\transforms\\149b1ee956b531a509b1145f23af4b93\\transformed\\material-1.12.0\\res\\values-zh-rTW\\values-zh-rTW.xml",

@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.neuropulse.app-mergeDebugResources-29:/values-v23/values-v23.xml",
+            "outputFile": "com.neuropulse.app-mergeDebugResources-33:/values-v23/values-v23.xml",
             "map": [
                 {
                     "source": "C:\\Users\\HP\\.gradle\\caches\\8.10.2\\transforms\\c23adb23dea507077775239de01313fc\\transformed\\cardview-1.0.0\\res\\values-v23\\values-v23.xml",

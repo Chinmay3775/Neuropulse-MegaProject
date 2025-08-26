@@ -28,7 +28,19 @@ android {
 }
 
 dependencies {
+    // Core Android
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.core:core-ktx:1.13.1'
+
+    // RecyclerView (for dashboard list)
+    implementation 'androidx.recyclerview:recyclerview:1.3.1'
+
+    // Room (Database)
+    implementation "androidx.room:room-runtime:2.5.2"
+    annotationProcessor "androidx.room:room-compiler:2.5.2"
+    // (if you later use Kotlin, replace with kapt)
+
+    // Lifecycle (to support LiveData/observers if you expand dashboard)
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.6.2'
 }
