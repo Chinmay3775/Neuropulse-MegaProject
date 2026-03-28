@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- activity_main.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,75 +6,59 @@
     android:padding="24dp">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="Neuropulse"
         android:textSize="32sp"
         android:textStyle="bold"
+        android:textColor="#1976D2"
         android:gravity="center"
-        android:layout_marginBottom="16dp"
-        android:textColor="#1976D2" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Digital Wellness Monitoring"
-        android:textSize="16sp"
+        android:text="AI-based Digital Wellness Monitoring"
+        android:textSize="14sp"
+        android:textColor="#666"
         android:gravity="center"
-        android:layout_marginBottom="32dp"
-        android:textColor="#666666" />
+        android:layout_marginBottom="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/statusText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Status: Checking permissions..."
-        android:textSize="14sp"
-        android:layout_marginBottom="24dp"
         android:padding="16dp"
+        android:textSize="14sp"
         android:background="#F5F5F5"
-        android:textColor="#333333" />
+        android:layout_marginBottom="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <Button
         android:id="@+id/startMonitoringBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="Start Monitoring"
-        android:textSize="16sp"
-        android:layout_marginBottom="16dp"
         android:background="#1976D2"
         android:textColor="#FFFFFF"
-        android:padding="16dp" />
+        android:padding="16dp"
+        android:layout_marginBottom="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <Button
         android:id="@+id/debugBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="View Real-time Debug"
-        android:textSize="16sp"
-        android:layout_marginBottom="16dp"
+        android:text="View Live Debug"
         android:background="#4CAF50"
         android:textColor="#FFFFFF"
-        android:padding="16dp" />
+        android:padding="16dp"
+        android:layout_marginBottom="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <Button
         android:id="@+id/permissionsBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Grant All Permissions"
-        android:textSize="16sp"
-        android:layout_marginBottom="32dp"
+        android:text="Grant Permissions"
         android:background="#FF9800"
         android:textColor="#FFFFFF"
-        android:padding="16dp" />
-
-    <TextView
+        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="This app analyzes your usage patterns to help improve digital wellness. All data stays on your device."
-        android:textSize="12sp"
-        android:gravity="center"
-        android:textColor="#999999"
-        android:layout_marginTop="24dp" />
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

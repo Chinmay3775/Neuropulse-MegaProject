@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "13734143230",
+    "project_id": "neuropulse-d909d",
+    "storage_bucket": "neuropulse-d909d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:13734143230:android:52829a31c03ec17601b1af",
+        "android_client_info": {
+          "package_name": "com.neuropulse.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCs6kj5jgZshhhT81UD3G3MT7iBbGQYjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

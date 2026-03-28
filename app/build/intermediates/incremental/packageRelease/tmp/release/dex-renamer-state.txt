@@ -1,0 +1,4 @@
+#Sun Jan 11 11:30:48 IST 2026
+base.0=D\:\\Neuropulse2\\app\\build\\intermediates\\dex\\release\\mergeDexRelease\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

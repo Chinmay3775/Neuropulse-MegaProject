@@ -1,36 +1,59 @@
 package com.neuropulse.app.adapters;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.neuropulse.app.R;
 import com.neuropulse.app.models.EnhancedDebugInfo;
 
-public class EnhancedDebugAdapter extends RecyclerView.Adapter<EnhancedDebugAdapter.EnhancedViewHolder> {
+public class EnhancedDebugAdapter
+        extends RecyclerView.Adapter<EnhancedDebugAdapter.EnhancedViewHolder> {
+
     private EnhancedDebugInfo debugInfo;
+
+    // ================= PUBLIC API =================
 
     public void updateEnhancedInfo(EnhancedDebugInfo info) {
         this.debugInfo = info;
         notifyDataSetChanged();
     }
 
+    // ================= ADAPTER CORE =================
+
     @NonNull
     @Override
-    public EnhancedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public EnhancedViewHolder onCreateViewHolder(
+            @NonNull ViewGroup parent, int viewType) {
+
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_enhanced_debug, parent, false);
         return new EnhancedViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull EnhancedViewHolder holder, int position) {
-        if (debugInfo == null || debugInfo.featureLabels == null ||
-                debugInfo.featureValues == null || position >= debugInfo.featureLabels.length) {
+    public void onBindViewHolder(
+            @NonNull EnhancedViewHolder holder, int position) {
+
+        // -------- SAFETY --------
+        if (debugInfo == null ||
+                debugInfo.featureLabels == null ||
+                debugInfo.featureValues == null ||
+                position >= debugInfo.featureLabels.length ||
+                position >= debugInfo.featureValues.length) {
+
+            holder.bind("Loading...", "...");
+            holder.valueText.setTextColor(
+                    ContextCompat.getColor(
+                            holder.itemView.getContext(),
+                            android.R.color.darker_gray
+                    )
+            );
             return;
         }
 
@@ -38,58 +61,81 @@ public class EnhancedDebugAdapter extends RecyclerView.Adapter<EnhancedDebugAdap
         String value = debugInfo.featureValues[position];
 
         if (label == null || value == null) {
+            holder.bind("N/A", "N/A");
             return;
         }
 
         holder.bind(label, value);
 
-        // Color coding for important metrics with null safety
-        int colorResId = android.R.color.black; // default
+        // -------- COLOR LOGIC (TEXT-BASED) --------
+        int colorRes = android.R.color.holo_blue_dark;
 
-        if (label.contains("Dopamine Risk") && debugInfo.prediction != null) {
-            String riskLevel = debugInfo.prediction.getRiskLevel();
-            if ("HIGH".equals(riskLevel)) {
-                colorResId = android.R.color.holo_red_dark;
-            } else if ("MEDIUM".equals(riskLevel)) {
-                colorResId = android.R.color.holo_orange_dark;
-            } else {
-                colorResId = android.R.color.holo_green_dark;
-            }
-        } else if (label.contains("Addiction Level") && debugInfo.prediction != null) {
-            switch (debugInfo.prediction.addictionLevel) {
-                case 0: colorResId = android.R.color.holo_green_dark; break;
-                case 1: colorResId = android.R.color.holo_orange_dark; break;
-                case 2: colorResId = android.R.color.holo_red_dark; break;
-            }
-        } else if (label.contains("Binge Flag") && "YES".equals(value)) {
-            colorResId = android.R.color.holo_red_dark;
-        } else {
-            colorResId = android.R.color.holo_blue_dark;
+        // Dopamine risk coloring
+        if (label.contains("Dopamine Risk")) {
+            try {
+                float risk = Float.parseFloat(value);
+                if (risk >= 0.7f) colorRes = android.R.color.holo_red_dark;
+                else if (risk >= 0.4f) colorRes = android.R.color.holo_orange_dark;
+                else colorRes = android.R.color.holo_green_dark;
+            } catch (Exception ignored) {}
         }
 
-        holder.valueText.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), colorResId));
+        // Risk level coloring
+        else if (label.contains("Risk Level")) {
+            if (value.equalsIgnoreCase("HIGH"))
+                colorRes = android.R.color.holo_red_dark;
+            else if (value.equalsIgnoreCase("MEDIUM"))
+                colorRes = android.R.color.holo_orange_dark;
+            else
+                colorRes = android.R.color.holo_green_dark;
+        }
 
-        // Add content description for accessibility
+        // Addiction state coloring
+        else if (label.contains("Addiction")) {
+            if (value.contains("High"))
+                colorRes = android.R.color.holo_red_dark;
+            else if (value.contains("Risk"))
+                colorRes = android.R.color.holo_orange_dark;
+            else
+                colorRes = android.R.color.holo_green_dark;
+        }
+
+        // Binge flag
+        else if (label.contains("Binge") && value.equalsIgnoreCase("YES")) {
+            colorRes = android.R.color.holo_red_dark;
+        }
+
+        holder.valueText.setTextColor(
+                ContextCompat.getColor(holder.itemView.getContext(), colorRes)
+        );
+
+        // Accessibility
         holder.itemView.setContentDescription(label + ": " + value);
     }
 
     @Override
     public int getItemCount() {
-        return debugInfo != null && debugInfo.featureLabels != null ? debugInfo.featureLabels.length : 0;
+        return (debugInfo != null && debugInfo.featureLabels != null)
+                ? debugInfo.featureLabels.length
+                : 0;
     }
 
-    static class EnhancedViewHolder extends RecyclerView.ViewHolder {
-        TextView labelText, valueText;
+    // ================= VIEW HOLDER =================
 
-        public EnhancedViewHolder(@NonNull View itemView) {
+    static class EnhancedViewHolder extends RecyclerView.ViewHolder {
+
+        final TextView labelText;
+        final TextView valueText;
+
+        EnhancedViewHolder(@NonNull View itemView) {
             super(itemView);
             labelText = itemView.findViewById(R.id.textEnhancedLabel);
             valueText = itemView.findViewById(R.id.textEnhancedValue);
         }
 
-        public void bind(String label, String value) {
-            if (labelText != null) labelText.setText(label);
-            if (valueText != null) valueText.setText(value);
+        void bind(String label, String value) {
+            labelText.setText(label);
+            valueText.setText(value);
         }
     }
 }

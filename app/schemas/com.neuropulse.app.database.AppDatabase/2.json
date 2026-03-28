@@ -1,0 +1,177 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "a1e8d0882fb794cd51eafd3687fe4389",
+    "entities": [
+      {
+        "tableName": "enhanced_session_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sessionId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` TEXT, `sessionDuration` INTEGER NOT NULL, `unlockCount` INTEGER NOT NULL, `appName` TEXT, `appCategory` INTEGER NOT NULL, `notifCount` INTEGER NOT NULL, `notifResponse` INTEGER NOT NULL, `appSwitchCount` INTEGER NOT NULL, `timeOfDay` REAL NOT NULL, `consecutiveSameApp` INTEGER NOT NULL, `bingeFlag` INTEGER NOT NULL, `dopamineSpikeFlag` INTEGER NOT NULL, `addictionFlag` INTEGER NOT NULL, `scrollsPerMinute` REAL NOT NULL, `unlockFrequency` REAL NOT NULL, `timestamp` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sessionDuration",
+            "columnName": "sessionDuration",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unlockCount",
+            "columnName": "unlockCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appName",
+            "columnName": "appName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "appCategory",
+            "columnName": "appCategory",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notifCount",
+            "columnName": "notifCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notifResponse",
+            "columnName": "notifResponse",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appSwitchCount",
+            "columnName": "appSwitchCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeOfDay",
+            "columnName": "timeOfDay",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "consecutiveSameApp",
+            "columnName": "consecutiveSameApp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bingeFlag",
+            "columnName": "bingeFlag",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dopamineSpikeFlag",
+            "columnName": "dopamineSpikeFlag",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addictionFlag",
+            "columnName": "addictionFlag",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scrollsPerMinute",
+            "columnName": "scrollsPerMinute",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unlockFrequency",
+            "columnName": "unlockFrequency",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "sessionId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_user_timestamp",
+            "unique": false,
+            "columnNames": [
+              "userId",
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_user_timestamp` ON `${TABLE_NAME}` (`userId`, `timestamp`)"
+          },
+          {
+            "name": "idx_app_category",
+            "unique": false,
+            "columnNames": [
+              "appCategory"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_app_category` ON `${TABLE_NAME}` (`appCategory`)"
+          },
+          {
+            "name": "idx_dopamine_flag",
+            "unique": false,
+            "columnNames": [
+              "dopamineSpikeFlag"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_dopamine_flag` ON `${TABLE_NAME}` (`dopamineSpikeFlag`)"
+          },
+          {
+            "name": "idx_addiction_flag",
+            "unique": false,
+            "columnNames": [
+              "addictionFlag"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_addiction_flag` ON `${TABLE_NAME}` (`addictionFlag`)"
+          },
+          {
+            "name": "idx_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a1e8d0882fb794cd51eafd3687fe4389')"
+    ]
+  }
+}

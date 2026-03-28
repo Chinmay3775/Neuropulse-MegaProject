@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.neuropulse.app-mergeDebugResources-32:/values-large-v4/values-large-v4.xml",
+            "outputFile": "com.neuropulse.app-mergeDebugResources-33:/values-large-v4/values-large-v4.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\HP\\.gradle\\caches\\8.10.2\\transforms\\a23052836ad7a6923c42064d11f9d46e\\transformed\\material-1.9.0\\res\\values-large-v4\\values-large-v4.xml",
+                    "source": "C:\\Users\\HP\\.gradle\\caches\\8.10.2\\transforms\\4c816a3fd323e9041edeb634db356b58\\transformed\\material-1.9.0\\res\\values-large-v4\\values-large-v4.xml",
                     "from": {
                         "startLines": "2,3,4,10",
                         "startColumns": "4,4,4,4",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\HP\\.gradle\\caches\\8.10.2\\transforms\\f52ea448491545fcb6cea38dbe2a548e\\transformed\\appcompat-1.6.1\\res\\values-large-v4\\values-large-v4.xml",
+                    "source": "C:\\Users\\HP\\.gradle\\caches\\8.10.2\\transforms\\73dcb31a26805a76a7ceca70473a660b\\transformed\\appcompat-1.6.1\\res\\values-large-v4\\values-large-v4.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10",
                         "startColumns": "4,4,4,4,4,4,4,4,4",

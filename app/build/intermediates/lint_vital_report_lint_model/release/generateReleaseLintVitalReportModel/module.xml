@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="D:\Neuropulse2\app"
+    name=":app"
+    type="APP"
+    maven="Neuropulse:app:unspecified"
+    agpVersion="8.8.0"
+    buildFolder="build"
+    bootClassPath="C:\Users\HP\AppData\Local\Android\Sdk\platforms\android-33\android.jar;C:\Users\HP\AppData\Local\Android\Sdk\build-tools\35.0.0\core-lambda-stubs.jar"
+    javaSourceLevel="14"
+    compileTarget="android-33"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

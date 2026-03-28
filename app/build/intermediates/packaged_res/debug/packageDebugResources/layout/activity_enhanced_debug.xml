@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- activity_enhanced_debug.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,27 +6,17 @@
     android:padding="16dp">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="🧠 Neuropulse Enhanced Debug"
-        android:textSize="24sp"
+        android:text="🧠 Neuropulse Live Debug"
+        android:textSize="22sp"
         android:textStyle="bold"
         android:gravity="center"
         android:layout_marginBottom="16dp"
-        android:textColor="#1976D2" />
-
-    <TextView
+        android:textColor="#1976D2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Real-time AI-powered addiction detection with 14 behavioral features"
-        android:textSize="12sp"
-        android:gravity="center"
-        android:layout_marginBottom="24dp"
-        android:textColor="#666666" />
+        android:layout_height="wrap_content"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerEnhancedDebug"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
+        android:layout_height="match_parent"/>
 </LinearLayout>

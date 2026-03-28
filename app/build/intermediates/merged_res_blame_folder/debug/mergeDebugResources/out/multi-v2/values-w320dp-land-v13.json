@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.neuropulse.app-mergeDebugResources-32:/values-w320dp-land-v13/values-w320dp-land-v13.xml",
+            "outputFile": "com.neuropulse.app-mergeDebugResources-33:/values-w320dp-land-v13/values-w320dp-land-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\HP\\.gradle\\caches\\8.10.2\\transforms\\a23052836ad7a6923c42064d11f9d46e\\transformed\\material-1.9.0\\res\\values-w320dp-land-v13\\values-w320dp-land-v13.xml",
+                    "source": "C:\\Users\\HP\\.gradle\\caches\\8.10.2\\transforms\\4c816a3fd323e9041edeb634db356b58\\transformed\\material-1.9.0\\res\\values-w320dp-land-v13\\values-w320dp-land-v13.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",
