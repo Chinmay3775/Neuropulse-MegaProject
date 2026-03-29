@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material default colors -->
+    <!-- ===== DARK MODE PALETTE ===== -->
+    <color name="bg_primary">#0D1117</color>
+    <color name="bg_surface">#161B22</color>
+    <color name="bg_card">#21262D</color>
+    <color name="bg_card_border">#30363D</color>
+    <color name="bg_elevated">#2D333B</color>
+
+    <!-- ===== ACCENT COLORS ===== -->
+    <color name="accent_blue">#58A6FF</color>
+    <color name="accent_green">#3FB950</color>
+    <color name="accent_amber">#D29922</color>
+    <color name="accent_red">#F85149</color>
+    <color name="accent_purple">#BC8CFF</color>
+    <color name="accent_cyan">#39D2C0</color>
+
+    <!-- ===== TEXT COLORS ===== -->
+    <color name="text_primary">#F0F6FC</color>
+    <color name="text_secondary">#8B949E</color>
+    <color name="text_muted">#6E7681</color>
+
+    <!-- ===== RISK GRADIENT ===== -->
+    <color name="risk_low">#3FB950</color>
+    <color name="risk_medium">#D29922</color>
+    <color name="risk_high">#F85149</color>
+
+    <!-- ===== CALMING OVERLAY ===== -->
+    <color name="calming_bg">#0A1628</color>
+    <color name="calming_accent">#5B86E5</color>
+    <color name="calming_glow">#1A3A6B</color>
+
+    <!-- ===== LEGACY (keeping for compat) ===== -->
     <color name="purple_200">#BB86FC</color>
     <color name="purple_500">#6200EE</color>
     <color name="purple_700">#3700B3</color>
@@ -8,11 +38,9 @@
     <color name="teal_700">#018786</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="orange">#FFA500</color> <!-- Orange -->
-    <color name="green">#4CAF50</color>  <!-- Green -->
-
-    <!-- Custom for your UI -->
-    <color name="background_light">#FAFAFA</color> <!-- Light gray background -->
-    <color name="gray">#757575</color>             <!-- Neutral gray for text -->
-    <color name="red">#D32F2F</color>              <!-- Strong red for High Risk -->
+    <color name="orange">#FFA500</color>
+    <color name="green">#4CAF50</color>
+    <color name="background_light">#FAFAFA</color>
+    <color name="gray">#757575</color>
+    <color name="red">#D32F2F</color>
 </resources>

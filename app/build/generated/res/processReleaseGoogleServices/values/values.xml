@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="gcm_defaultSenderId" translatable="false">13734143230</string>
-    <string name="google_api_key" translatable="false">AIzaSyBCs6kj5jgZshhhT81UD3G3MT7iBbGQYjo</string>
-    <string name="google_app_id" translatable="false">1:13734143230:android:52829a31c03ec17601b1af</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBCs6kj5jgZshhhT81UD3G3MT7iBbGQYjo</string>
-    <string name="google_storage_bucket" translatable="false">neuropulse-d909d.firebasestorage.app</string>
-    <string name="project_id" translatable="false">neuropulse-d909d</string>
-</resources>

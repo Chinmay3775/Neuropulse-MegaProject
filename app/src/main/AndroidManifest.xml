@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
+    <!-- Overlay permission for blocking screen -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <!-- Service permissions -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
@@ -46,14 +49,6 @@
             android:theme="@style/Theme.Neuropulse"
             android:screenOrientation="portrait" />
 
-        <!-- Enhanced Debug Activity -->
-        <activity
-            android:name=".EnhancedDebugActivity"
-            android:exported="false"
-            android:label="Debug Monitor"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.Neuropulse"
-            android:screenOrientation="portrait" />
 
         <!-- Background Usage Monitor Service -->
         <service
@@ -63,12 +58,21 @@
             android:foregroundServiceType="dataSync"
             android:stopWithTask="false" />
 
+        <!-- Intervention Alert Dialog -->
         <activity
             android:name=".ui.AlertActivity"
-            android:theme="@android:style/Theme.DeviceDefault.Dialog"
+            android:theme="@style/Theme.Neuropulse.Alert"
             android:excludeFromRecents="true"
+            android:showWhenLocked="true"
             android:taskAffinity="" />
 
+        <!-- Full-screen Blocking Overlay -->
+        <activity
+            android:name=".ui.BlockingOverlayActivity"
+            android:theme="@style/Theme.Neuropulse.Blocking"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:taskAffinity="" />
 
     </application>
 

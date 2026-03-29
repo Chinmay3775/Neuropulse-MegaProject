@@ -12,6 +12,9 @@
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
+    <!-- Overlay permission for blocking screen -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <!-- Service permissions -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
@@ -60,15 +63,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Neuropulse" />
 
-        <!-- Enhanced Debug Activity -->
-        <activity
-            android:name="com.neuropulse.app.EnhancedDebugActivity"
-            android:exported="false"
-            android:label="Debug Monitor"
-            android:parentActivityName="com.neuropulse.app.MainActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Neuropulse" />
-
         <!-- Background Usage Monitor Service -->
         <service
             android:name="com.neuropulse.app.services.UsageMonitorService"
@@ -77,11 +71,21 @@
             android:foregroundServiceType="dataSync"
             android:stopWithTask="false" />
 
+        <!-- Intervention Alert Dialog -->
         <activity
             android:name="com.neuropulse.app.ui.AlertActivity"
             android:excludeFromRecents="true"
+            android:showWhenLocked="true"
             android:taskAffinity=""
-            android:theme="@android:style/Theme.DeviceDefault.Dialog" />
+            android:theme="@style/Theme.Neuropulse.Alert" />
+
+        <!-- Full-screen Blocking Overlay -->
+        <activity
+            android:name="com.neuropulse.app.ui.BlockingOverlayActivity"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Neuropulse.Blocking" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

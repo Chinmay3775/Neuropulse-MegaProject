@@ -4,78 +4,257 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
+import com.neuropulse.app.adapters.EnhancedDebugAdapter;
+import com.neuropulse.app.features.EnhancedFeatureExtractor;
+import com.neuropulse.app.features.RealTimeAppDetector;
+import com.neuropulse.app.features.StreakManager;
+import com.neuropulse.app.ml.AddictionPredictor;
+import com.neuropulse.app.models.EnhancedDebugInfo;
+import com.neuropulse.app.models.SessionFeatures;
 import com.neuropulse.app.services.UsageMonitorService;
+
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView statusText;
-    private Button startBtn, debugBtn, permissionBtn;
+    private static final String TAG = "MainActivity";
+
+    // Sub-components
+    private RealTimeAppDetector appDetector;
+    private EnhancedFeatureExtractor featureExtractor;
+    private AddictionPredictor addictionPredictor;
+    private StreakManager streakManager;
+
+    // UI — Permission
+    private View permissionContainer;
+    private MaterialButton permissionsBtn;
+
+    // UI — Dashboard
+    private View dashboardContainer;
+    private TextView streakBadgeText;
+    private TextView streakCountText;
+    private TextView streakMessageText;
+    private ProgressBar riskProgressBar;
+    private TextView riskScoreText;
+    private TextView currentAppText;
+    private TextView riskLevelText;
+    private TextView riskTrendText;
+    private TextView usageClassText;
+
+    // UI — Stats Row
+    private TextView sessionDurationText;
+    private TextView interventionsText;
+    private TextView rewardLevelText;
+
+    // UI — Advanced Metrics
+    private EnhancedDebugAdapter debugAdapter;
+
+    // Timing state
+    private long sessionStartTime = System.currentTimeMillis();
+    private String currentPackage = null;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private boolean isVisible = false;
+
+    // Updater Runnable
+    private final Runnable uiUpdater = new Runnable() {
+        @Override
+        public void run() {
+            if (!isVisible) return;
+            updateDashboard();
+            handler.postDelayed(this, 2000); // 2-second refresh
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        statusText = findViewById(R.id.statusText);
-        startBtn = findViewById(R.id.startMonitoringBtn);
-        debugBtn = findViewById(R.id.debugBtn);
-        permissionBtn = findViewById(R.id.permissionsBtn);
+        // Core components
+        appDetector = new RealTimeAppDetector(this);
+        featureExtractor = new EnhancedFeatureExtractor(this);
+        addictionPredictor = new AddictionPredictor(this);
+        streakManager = new StreakManager(this);
 
-        updateStatus();
+        initViews();
+        setupRecyclerView();
 
-        startBtn.setOnClickListener(v -> {
-            if (hasUsagePermission()) {
-                startForegroundService(
-                        new Intent(this, UsageMonitorService.class)
-                );
-                Toast.makeText(this, "Monitoring Started", Toast.LENGTH_SHORT).show();
-            } else {
-                openPermissionHelper();
-            }
+        permissionsBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            startActivity(intent);
         });
-
-        debugBtn.setOnClickListener(v -> {
-            if (!hasUsagePermission()) {
-                openPermissionHelper();
-                return;
-            }
-            startActivity(new Intent(this, EnhancedDebugActivity.class));
-        });
-
-        permissionBtn.setOnClickListener(v -> openPermissionHelper());
     }
 
-    private void updateStatus() {
-        if (hasUsagePermission()) {
-            statusText.setText("✅ Permission granted\nReady to monitor usage");
-        } else {
-            statusText.setText("⚠️ Usage Access permission required");
-        }
+    private void initViews() {
+        permissionContainer = findViewById(R.id.permissionContainer);
+        permissionsBtn = findViewById(R.id.permissionsBtn);
+
+        dashboardContainer = findViewById(R.id.dashboardContainer);
+        streakBadgeText = findViewById(R.id.streakBadge);
+        streakCountText = findViewById(R.id.streakCountText);
+        streakMessageText = findViewById(R.id.streakMessageText);
+
+        riskProgressBar = findViewById(R.id.riskProgressBar);
+        riskScoreText = findViewById(R.id.riskScoreText);
+        currentAppText = findViewById(R.id.currentAppText);
+        riskLevelText = findViewById(R.id.riskLevelText);
+        riskTrendText = findViewById(R.id.riskTrendText);
+        usageClassText = findViewById(R.id.usageClassText);
+
+        sessionDurationText = findViewById(R.id.sessionDurationText);
+        interventionsText = findViewById(R.id.interventionsText);
+        rewardLevelText = findViewById(R.id.rewardLevelText);
     }
 
-    private boolean hasUsagePermission() {
-        AppOpsManager ops = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
-        int mode = ops.checkOpNoThrow(
-                AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(),
-                getPackageName()
-        );
-        return mode == AppOpsManager.MODE_ALLOWED;
-    }
-
-    private void openPermissionHelper() {
-        startActivity(new Intent(this, PermissionHelperActivity.class));
+    private void setupRecyclerView() {
+        RecyclerView recycler = findViewById(R.id.recyclerEnhancedDebug);
+        recycler.setLayoutManager(new LinearLayoutManager(this));
+        recycler.setHasFixedSize(true);
+        debugAdapter = new EnhancedDebugAdapter();
+        recycler.setAdapter(debugAdapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        updateStatus();
+        isVisible = true;
+
+        if (!hasUsageStatsPermission()) {
+            permissionContainer.setVisibility(View.VISIBLE);
+            dashboardContainer.setVisibility(View.GONE);
+        } else {
+            permissionContainer.setVisibility(View.GONE);
+            dashboardContainer.setVisibility(View.VISIBLE);
+
+            // Trigger streaks evaluation early today
+            streakManager.evaluateDay();
+
+            // Start Monitoring Service
+            Intent intent = new Intent(this, UsageMonitorService.class);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            } else {
+                startService(intent);
+            }
+
+            handler.post(uiUpdater);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isVisible = false;
+        handler.removeCallbacks(uiUpdater);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (addictionPredictor != null) {
+            addictionPredictor.close();
+        }
+    }
+
+    // ================= DASHBOARD UPDATES =================
+
+    private void updateDashboard() {
+        long now = System.currentTimeMillis();
+        RealTimeAppDetector.CurrentAppInfo app = appDetector.getCurrentAppWithRisk();
+
+        // Handle app transition
+        if (!app.packageName.equals(currentPackage)) {
+            currentPackage = app.packageName;
+            sessionStartTime = now;
+            // Record if it's the app itself measuring for debug info purposes
+        }
+
+        // Feature Extraction
+        SessionFeatures features = featureExtractor.extract(app.category, sessionStartTime, now);
+        
+        // Ensure UI doesn't track its own app as doomscrolling
+        if (app.packageName.equals(getPackageName())) {
+             features.appCategory = 1; // force productive
+             features.sessionDurationMs = 0;
+        }
+
+        // ML Prediction
+        AddictionPredictor.PredictionResult result = addictionPredictor.predict(features);
+
+        // Update Gauge
+        int progress = (int) (result.dopamineRisk * 100);
+        riskProgressBar.setProgress(progress);
+        riskScoreText.setText(progress + "%");
+
+        int color = getColor(result.addictionLevel >= 2 ? R.color.accent_red :
+                             result.addictionLevel == 1 ? R.color.accent_amber : R.color.accent_green);
+
+        riskScoreText.setTextColor(color);
+        riskLevelText.setTextColor(color);
+        riskLevelText.setText(result.riskLevel);
+
+        currentAppText.setText(app.displayName);
+
+        // Update Extended Metrics
+        EnhancedDebugInfo info = EnhancedDebugInfo.from(features, app, result);
+
+        usageClassText.setText(info.usageClass);
+        riskTrendText.setText(info.lastTrend);
+        
+        // Colors for usage class indicator
+        if (info.usageClass.contains("PRODUCTIVE")) {
+            usageClassText.setTextColor(getColor(R.color.accent_green));
+        } else if (info.usageClass.contains("ADDICTIVE")) {
+            usageClassText.setTextColor(getColor(R.color.accent_red));
+        } else {
+            usageClassText.setTextColor(getColor(R.color.text_muted));
+        }
+
+        // Stats Row
+        long sec = features.sessionDurationMs / 1000;
+        sessionDurationText.setText((sec > 60) ? (sec / 60) + "m" : sec + "s");
+
+        com.neuropulse.app.utils.AlertResponseTracker alertTracker = new com.neuropulse.app.utils.AlertResponseTracker(this);
+        interventionsText.setText(String.valueOf(alertTracker.getTodayInterventions()));
+
+        rewardLevelText.setText(streakManager.getRewardLevel());
+
+        // Streak Card
+        int currentStreak = streakManager.getCurrentStreak();
+        streakBadgeText.setText("🔥 " + currentStreak);
+        streakCountText.setText(currentStreak == 1 ? "1 day" : currentStreak + " days");
+        streakMessageText.setText(streakManager.getStreakMessage());
+
+        // Recycler View
+        debugAdapter.updateEnhancedInfo(info);
+    }
+
+    // ================= PERMISSIONS =================
+
+    private boolean hasUsageStatsPermission() {
+        AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                getPackageName()
+        );
+
+        if (mode == AppOpsManager.MODE_DEFAULT) {
+            return checkCallingOrSelfPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+                    == android.content.pm.PackageManager.PERMISSION_GRANTED;
+        }
+        return mode == AppOpsManager.MODE_ALLOWED;
     }
 }

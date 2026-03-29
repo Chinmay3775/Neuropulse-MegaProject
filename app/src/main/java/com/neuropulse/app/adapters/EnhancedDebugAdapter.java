@@ -51,7 +51,7 @@ public class EnhancedDebugAdapter
             holder.valueText.setTextColor(
                     ContextCompat.getColor(
                             holder.itemView.getContext(),
-                            android.R.color.darker_gray
+                            R.color.text_muted
                     )
             );
             return;
@@ -68,46 +68,37 @@ public class EnhancedDebugAdapter
         holder.bind(label, value);
 
         // -------- COLOR LOGIC (TEXT-BASED) --------
-        int colorRes = android.R.color.holo_blue_dark;
-
-        // Dopamine risk coloring
-        if (label.contains("Dopamine Risk")) {
-            try {
-                float risk = Float.parseFloat(value);
-                if (risk >= 0.7f) colorRes = android.R.color.holo_red_dark;
-                else if (risk >= 0.4f) colorRes = android.R.color.holo_orange_dark;
-                else colorRes = android.R.color.holo_green_dark;
-            } catch (Exception ignored) {}
+        int colorRes = R.color.accent_blue;
+        
+        String lowerLabel = label.toLowerCase();
+        
+        if (lowerLabel.contains("action") && value.contains("break")) {
+            colorRes = R.color.accent_red;
+        } else if (lowerLabel.contains("action")) {
+            colorRes = R.color.accent_green;
+        }
+        
+        if (lowerLabel.contains("addiction") && value.contains("High")) {
+            colorRes = R.color.accent_red;
+        } else if (lowerLabel.contains("addiction") && value.contains("Risk")) {
+            colorRes = R.color.accent_amber;
         }
 
-        // Risk level coloring
-        else if (label.contains("Risk Level")) {
-            if (value.equalsIgnoreCase("HIGH"))
-                colorRes = android.R.color.holo_red_dark;
-            else if (value.equalsIgnoreCase("MEDIUM"))
-                colorRes = android.R.color.holo_orange_dark;
-            else
-                colorRes = android.R.color.holo_green_dark;
+        if (lowerLabel.contains("classification")) {
+            if (value.contains("PRODUCTIVE")) colorRes = R.color.accent_green;
+            else if (value.contains("ADDICTIVE")) colorRes = R.color.accent_red;
+            else if (value.contains("MODERATE")) colorRes = R.color.accent_amber;
+        }
+        
+        if (lowerLabel.contains("trend")) {
+            if (value.contains("↑")) colorRes = R.color.accent_red;
+            else if (value.contains("↓")) colorRes = R.color.accent_green;
+            else colorRes = R.color.text_muted;
         }
 
-        // Addiction state coloring
-        else if (label.contains("Addiction")) {
-            if (value.contains("High"))
-                colorRes = android.R.color.holo_red_dark;
-            else if (value.contains("Risk"))
-                colorRes = android.R.color.holo_orange_dark;
-            else
-                colorRes = android.R.color.holo_green_dark;
-        }
-
-        // Binge flag
-        else if (label.contains("Binge") && value.equalsIgnoreCase("YES")) {
-            colorRes = android.R.color.holo_red_dark;
-        }
-
-        holder.valueText.setTextColor(
-                ContextCompat.getColor(holder.itemView.getContext(), colorRes)
-        );
+        int finalColor = ContextCompat.getColor(holder.itemView.getContext(), colorRes);
+        holder.valueText.setTextColor(finalColor);
+        holder.indicatorStrip.setBackgroundColor(finalColor);
 
         // Accessibility
         holder.itemView.setContentDescription(label + ": " + value);
@@ -126,11 +117,13 @@ public class EnhancedDebugAdapter
 
         final TextView labelText;
         final TextView valueText;
+        final View indicatorStrip;
 
         EnhancedViewHolder(@NonNull View itemView) {
             super(itemView);
             labelText = itemView.findViewById(R.id.textEnhancedLabel);
             valueText = itemView.findViewById(R.id.textEnhancedValue);
+            indicatorStrip = itemView.findViewById(R.id.indicatorStrip);
         }
 
         void bind(String label, String value) {

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/calming_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <!-- Breathing circle -->
+    <View
+        android:id="@+id/breathingCircle"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:background="@drawable/breathing_circle"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Breathing instruction -->
+    <TextView
+        android:id="@+id/breathingTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Box Breathing"
+        android:textColor="@color/text_primary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/breathingInstructions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Inhale 4s → Hold 4s → Exhale 4s → Hold 4s"
+        android:textColor="@color/calming_accent"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Countdown timer -->
+    <TextView
+        android:id="@+id/cooldownTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5:00"
+        android:textColor="@color/text_primary"
+        android:textSize="56sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="COOLDOWN REMAINING"
+        android:textColor="@color/text_muted"
+        android:textSize="12sp"
+        android:letterSpacing="0.15"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Cooldown progress -->
+    <ProgressBar
+        android:id="@+id/cooldownProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:max="100"
+        android:progress="100"
+        android:progressTint="@color/calming_accent"
+        android:progressBackgroundTint="@color/bg_card"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Motivational quote -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_glass_bg"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:id="@+id/quoteText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="\"Almost everything will work again if you unplug it for a few minutes… including you.\""
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:fontFamily="serif"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp" />
+    </LinearLayout>
+
+    <!-- Suggestion -->
+    <TextView
+        android:id="@+id/suggestionText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 Try reading a chapter of a book"
+        android:textColor="@color/text_muted"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Return to NeuroPulse -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnReturnToApp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:text="Open NeuroPulse"
+        android:textColor="@color/calming_accent"
+        android:textAllCaps="false"
+        app:strokeColor="@color/calming_accent"
+        app:strokeWidth="1dp"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>

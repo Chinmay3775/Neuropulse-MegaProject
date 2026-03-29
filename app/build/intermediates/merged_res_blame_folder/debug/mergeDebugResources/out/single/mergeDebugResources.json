@@ -4,20 +4,16 @@
         "source": "com.neuropulse.app-main-37:/mipmap-mdpi/ic_launcher.webp"
     },
     {
-        "merged": "com.neuropulse.app-debug-35:/layout_activity_permission_helper.xml.flat",
-        "source": "com.neuropulse.app-main-37:/layout/activity_permission_helper.xml"
-    },
-    {
         "merged": "com.neuropulse.app-debug-35:/mipmap-xhdpi_ic_launcher.webp.flat",
         "source": "com.neuropulse.app-main-37:/mipmap-xhdpi/ic_launcher.webp"
     },
     {
-        "merged": "com.neuropulse.app-debug-35:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "com.neuropulse.app-main-37:/mipmap-xxxhdpi/ic_launcher_round.webp"
+        "merged": "com.neuropulse.app-debug-35:/layout_activity_alert.xml.flat",
+        "source": "com.neuropulse.app-main-37:/layout/activity_alert.xml"
     },
     {
-        "merged": "com.neuropulse.app-debug-35:/layout_activity_enhanced_debug.xml.flat",
-        "source": "com.neuropulse.app-main-37:/layout/activity_enhanced_debug.xml"
+        "merged": "com.neuropulse.app-debug-35:/drawable_circular_progress.xml.flat",
+        "source": "com.neuropulse.app-main-37:/drawable/circular_progress.xml"
     },
     {
         "merged": "com.neuropulse.app-debug-35:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
@@ -28,16 +24,8 @@
         "source": "com.neuropulse.app-main-37:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "com.neuropulse.app-debug-35:/layout_activity_main.xml.flat",
-        "source": "com.neuropulse.app-main-37:/layout/activity_main.xml"
-    },
-    {
-        "merged": "com.neuropulse.app-debug-35:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
-        "source": "com.neuropulse.app-main-37:/mipmap-hdpi/ic_launcher_foreground.webp"
-    },
-    {
-        "merged": "com.neuropulse.app-debug-35:/mipmap-hdpi_ic_launcher.webp.flat",
-        "source": "com.neuropulse.app-main-37:/mipmap-hdpi/ic_launcher.webp"
+        "merged": "com.neuropulse.app-debug-35:/drawable_card_glass_bg.xml.flat",
+        "source": "com.neuropulse.app-main-37:/drawable/card_glass_bg.xml"
     },
     {
         "merged": "com.neuropulse.app-debug-35:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
@@ -52,6 +40,58 @@
         "source": "com.neuropulse.app-main-37:/mipmap-xxhdpi/ic_launcher.webp"
     },
     {
+        "merged": "com.neuropulse.app-debug-35:/layout_activity_blocking_overlay.xml.flat",
+        "source": "com.neuropulse.app-main-37:/layout/activity_blocking_overlay.xml"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.neuropulse.app-main-37:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.neuropulse.app-main-37:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.neuropulse.app-main-37:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/layout_activity_permission_helper.xml.flat",
+        "source": "com.neuropulse.app-main-37:/layout/activity_permission_helper.xml"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.neuropulse.app-main-37:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/drawable_metric_card_bg.xml.flat",
+        "source": "com.neuropulse.app-main-37:/drawable/metric_card_bg.xml"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/drawable_alert_bg.xml.flat",
+        "source": "com.neuropulse.app-main-37:/drawable/alert_bg.xml"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/drawable_button_primary.xml.flat",
+        "source": "com.neuropulse.app-main-37:/drawable/button_primary.xml"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/drawable_breathing_circle.xml.flat",
+        "source": "com.neuropulse.app-main-37:/drawable/breathing_circle.xml"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/layout_activity_main.xml.flat",
+        "source": "com.neuropulse.app-main-37:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.neuropulse.app-main-37:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.neuropulse.app-debug-35:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.neuropulse.app-main-37:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
         "merged": "com.neuropulse.app-debug-35:/mipmap-mdpi_ic_launcher_round.webp.flat",
         "source": "com.neuropulse.app-main-37:/mipmap-mdpi/ic_launcher_round.webp"
     },
@@ -64,20 +104,8 @@
         "source": "com.neuropulse.app-main-37:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
     },
     {
-        "merged": "com.neuropulse.app-debug-35:/mipmap-xxxhdpi_ic_launcher.webp.flat",
-        "source": "com.neuropulse.app-main-37:/mipmap-xxxhdpi/ic_launcher.webp"
-    },
-    {
-        "merged": "com.neuropulse.app-debug-35:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "com.neuropulse.app-main-37:/mipmap-anydpi-v26/ic_launcher_round.xml"
-    },
-    {
         "merged": "com.neuropulse.app-debug-35:/mipmap-hdpi_ic_launcher_round.webp.flat",
         "source": "com.neuropulse.app-main-37:/mipmap-hdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "com.neuropulse.app-debug-35:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
-        "source": "com.neuropulse.app-main-37:/mipmap-xxhdpi/ic_launcher_foreground.webp"
     },
     {
         "merged": "com.neuropulse.app-debug-35:/drawable_ic_launcher_background.xml.flat",

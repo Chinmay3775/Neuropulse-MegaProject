@@ -1,4 +1,4 @@
-// RealTimeAppDetector.java (FIXED - Multiple Detection Methods)
+// RealTimeAppDetector.java (ENHANCED)
 package com.neuropulse.app.features;
 
 import android.app.ActivityManager;
@@ -10,7 +10,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import java.util.Calendar;
+import com.neuropulse.app.ml.RiskThresholds;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +29,10 @@ public class RealTimeAppDetector {
     private final ActivityManager activityManager;
     private final Map<String, AppRiskProfile> appRiskProfiles;
 
+    // Stabilization state
     private String lastStablePackage = "unknown";
-    private long lastStableSince = 0L;
+    private String candidatePackage = null;
+    private long candidateSince = 0L;
 
     public RealTimeAppDetector(Context context) {
         this.context = context.getApplicationContext();
@@ -44,22 +47,19 @@ public class RealTimeAppDetector {
     public CurrentAppInfo getCurrentAppWithRisk() {
         String pkg = getCurrentForegroundApp();
 
-        Log.d(TAG, "Final detected package: " + pkg);
-
         if (pkg == null || "unknown".equals(pkg)) {
             return new CurrentAppInfo(
                     "unknown",
                     "Unknown App",
-                    5,
+                    RiskThresholds.CATEGORY_UTILITIES,
                     0.0f,
                     "No active app detected"
             );
         }
 
-        AppRiskProfile profile = appRiskProfiles.getOrDefault(pkg, createDefaultRiskProfile());
+        AppRiskProfile profile = appRiskProfiles.getOrDefault(pkg, getDynamicRiskProfile(pkg));
         String displayName = getAppDisplayName(pkg);
-
-        float risk = calculateRealTimeRisk(pkg, profile);
+        float risk = profile.baseRisk; // Live ML engine will override this anyway
         String reason = generateRiskReason(pkg, profile, risk);
 
         return new CurrentAppInfo(
@@ -76,61 +76,42 @@ public class RealTimeAppDetector {
     private String getCurrentForegroundApp() {
         String detected = null;
 
-        // METHOD 1: UsageStats with recent time window
         detected = getFromUsageStats();
         if (detected != null && !detected.equals("unknown")) {
-            Log.i(TAG, "✅ Method 1 (UsageStats) detected: " + detected);
             return stabilizePackage(detected);
         }
 
-        // METHOD 2: UsageEvents (different approach)
         detected = getFromUsageEvents();
         if (detected != null && !detected.equals("unknown")) {
-            Log.i(TAG, "✅ Method 2 (UsageEvents) detected: " + detected);
             return stabilizePackage(detected);
         }
 
-        // METHOD 3: ActivityManager RunningTasks
         detected = getFromActivityManager();
         if (detected != null && !detected.equals("unknown")) {
-            Log.i(TAG, "✅ Method 3 (ActivityManager) detected: " + detected);
             return stabilizePackage(detected);
         }
 
-        // METHOD 4: ActivityManager RunningAppProcesses
         detected = getFromRunningProcesses();
         if (detected != null && !detected.equals("unknown")) {
-            Log.i(TAG, "✅ Method 4 (RunningProcesses) detected: " + detected);
             return stabilizePackage(detected);
         }
 
-        Log.w(TAG, "⚠️ All detection methods failed, using last stable: " + lastStablePackage);
         return lastStablePackage;
     }
 
     // METHOD 1: UsageStats - Query recent usage
     private String getFromUsageStats() {
-        if (usageStatsManager == null) {
-            Log.w(TAG, "UsageStatsManager is null");
-            return null;
-        }
+        if (usageStatsManager == null) return null;
 
         try {
             long now = System.currentTimeMillis();
-            long startTime = now - TimeUnit.MINUTES.toMillis(1); // Last 1 minute
+            long startTime = now - TimeUnit.MINUTES.toMillis(1);
 
             List<UsageStats> statsList = usageStatsManager.queryUsageStats(
-                    UsageStatsManager.INTERVAL_BEST,
-                    startTime,
-                    now
-            );
+                    UsageStatsManager.INTERVAL_BEST, startTime, now);
 
-            if (statsList == null || statsList.isEmpty()) {
-                Log.w(TAG, "UsageStats list is empty - check permission");
-                return null;
-            }
+            if (statsList == null || statsList.isEmpty()) return null;
 
-            // Sort by last time used
             SortedMap<Long, UsageStats> sortedStats = new TreeMap<>();
             for (UsageStats stats : statsList) {
                 if (stats.getLastTimeUsed() > 0) {
@@ -141,133 +122,87 @@ public class RealTimeAppDetector {
             if (!sortedStats.isEmpty()) {
                 UsageStats mostRecent = sortedStats.get(sortedStats.lastKey());
                 String pkg = mostRecent.getPackageName();
-
-                if (!isIgnorablePackage(pkg)) {
-                    Log.d(TAG, "UsageStats: " + pkg + " (last used: " +
-                            (now - mostRecent.getLastTimeUsed()) + "ms ago)");
-                    return pkg;
-                }
+                if (!isIgnorablePackage(pkg)) return pkg;
             }
-
         } catch (Exception e) {
             Log.e(TAG, "UsageStats method failed", e);
         }
         return null;
     }
 
-    // METHOD 2: UsageEvents - Check recent events
+    // METHOD 2: UsageEvents
     private String getFromUsageEvents() {
         if (usageStatsManager == null) return null;
-
         try {
             long now = System.currentTimeMillis();
             long startTime = now - TimeUnit.SECONDS.toMillis(5);
 
             UsageEvents events = usageStatsManager.queryEvents(startTime, now);
-            if (events == null) {
-                Log.w(TAG, "UsageEvents is null");
-                return null;
-            }
+            if (events == null) return null;
 
             String lastApp = null;
             long lastTime = 0;
-
             UsageEvents.Event event = new UsageEvents.Event();
             while (events.hasNextEvent()) {
                 events.getNextEvent(event);
-
                 if (event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND) {
                     String pkg = event.getPackageName();
-
                     if (!isIgnorablePackage(pkg) && event.getTimeStamp() > lastTime) {
                         lastTime = event.getTimeStamp();
                         lastApp = pkg;
                     }
                 }
             }
-
-            if (lastApp != null) {
-                Log.d(TAG, "UsageEvents: " + lastApp);
-                return lastApp;
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "UsageEvents method failed", e);
-        }
+            if (lastApp != null) return lastApp;
+        } catch (Exception e) {}
         return null;
     }
 
-    // METHOD 3: ActivityManager RunningTasks
+    // METHOD 3: ActivityManager
     private String getFromActivityManager() {
         if (activityManager == null) return null;
-
         try {
             List<ActivityManager.RunningTaskInfo> tasks = activityManager.getRunningTasks(1);
-
             if (tasks != null && !tasks.isEmpty()) {
                 ActivityManager.RunningTaskInfo taskInfo = tasks.get(0);
-
                 if (taskInfo.topActivity != null) {
                     String pkg = taskInfo.topActivity.getPackageName();
-
-                    if (!isIgnorablePackage(pkg)) {
-                        Log.d(TAG, "ActivityManager: " + pkg);
-                        return pkg;
-                    }
+                    if (!isIgnorablePackage(pkg)) return pkg;
                 }
             }
-        } catch (Exception e) {
-            Log.e(TAG, "ActivityManager method failed", e);
-        }
+        } catch (Exception e) {}
         return null;
     }
 
-    // METHOD 4: Running App Processes
+    // METHOD 4: ActivityManager Processes
     private String getFromRunningProcesses() {
         if (activityManager == null) return null;
-
         try {
-            List<ActivityManager.RunningAppProcessInfo> processes =
-                    activityManager.getRunningAppProcesses();
-
+            List<ActivityManager.RunningAppProcessInfo> processes = activityManager.getRunningAppProcesses();
             if (processes != null) {
                 for (ActivityManager.RunningAppProcessInfo processInfo : processes) {
-                    if (processInfo.importance ==
-                            ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-
+                    if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
                         String pkg = processInfo.processName;
-                        if (!isIgnorablePackage(pkg)) {
-                            Log.d(TAG, "RunningProcesses: " + pkg);
-                            return pkg;
-                        }
+                        if (!isIgnorablePackage(pkg)) return pkg;
                     }
                 }
             }
-        } catch (Exception e) {
-            Log.e(TAG, "RunningProcesses method failed", e);
-        }
+        } catch (Exception e) {}
         return null;
     }
 
-    // Package filtering
+    // ========================= UTILS & STABILIZATION =========================
+
     private boolean isIgnorablePackage(String pkg) {
         if (pkg == null || pkg.isEmpty()) return true;
-
         String ownPackage = context.getPackageName();
-
         return pkg.equals(ownPackage) ||
                 pkg.equals("android") ||
-                pkg.equals("com.android.systemui") ||
-                pkg.equals("com.android.launcher3") ||
-                pkg.equals("com.google.android.apps.nexuslauncher") ||
+                pkg.contains("systemui") ||
                 pkg.contains("launcher") ||
-                pkg.startsWith("com.android.") ||
-                pkg.startsWith("android.") ||
-                pkg.startsWith("com.google.android.permissioncontroller") ||
-                pkg.startsWith("com.google.android.gms");
+                pkg.startsWith("com.google.android.permission");
     }
 
-    // Stabilization
     private String stabilizePackage(String candidate) {
         if (candidate == null || candidate.equals("unknown")) {
             return lastStablePackage;
@@ -275,53 +210,28 @@ public class RealTimeAppDetector {
 
         long now = System.currentTimeMillis();
 
-        if (!candidate.equals(lastStablePackage)) {
-            // Require 1 second of stability
-            if (now - lastStableSince < 1000) {
-                return lastStablePackage;
-            } else {
-                Log.i(TAG, "🔄 App changed: " + lastStablePackage + " → " + candidate);
-                lastStablePackage = candidate;
-                lastStableSince = now;
-            }
-        } else {
-            lastStableSince = now;
+        if (candidate.equals(lastStablePackage)) {
+            // Unchanged
+            candidatePackage = null;
+            return lastStablePackage;
+        }
+
+        // It's a new app. Have we seen it as candidate yet?
+        if (!candidate.equals(candidatePackage)) {
+            // First time seeing this new app — start the clock
+            candidatePackage = candidate;
+            candidateSince = now;
+            return lastStablePackage; // wait until stable
+        }
+
+        // We've seen it before. Has it been stable long enough? (1 second)
+        if (now - candidateSince >= 1000) {
+            Log.i(TAG, "🔄 App stabilized: " + lastStablePackage + " → " + candidate);
+            lastStablePackage = candidate;
+            candidatePackage = null;
         }
 
         return lastStablePackage;
-    }
-
-    // ========================= RISK CALCULATION =========================
-
-    private float calculateRealTimeRisk(String packageName, AppRiskProfile profile) {
-        float baseRisk = profile.baseRisk;
-
-        try {
-            float timeOfDayRisk = getTimeOfDayRisk();
-            float continuousRisk = getContinuousUsageRisk(profile);
-
-            float risk = baseRisk + (timeOfDayRisk * 0.2f) + (continuousRisk * 0.3f);
-
-            return Math.max(0f, Math.min(1f, risk));
-        } catch (Exception e) {
-            return baseRisk;
-        }
-    }
-
-    private float getTimeOfDayRisk() {
-        Calendar cal = Calendar.getInstance();
-        int hour = cal.get(Calendar.HOUR_OF_DAY);
-
-        if (hour >= 23 || hour <= 5) return 0.3f;
-        if (hour >= 20) return 0.15f;
-        return 0.05f;
-    }
-
-    private float getContinuousUsageRisk(AppRiskProfile profile) {
-        if (profile.category == 0 || profile.category == 3 || profile.category == 2) {
-            return 0.25f;
-        }
-        return 0.1f;
     }
 
     private String getAppDisplayName(String packageName) {
@@ -338,13 +248,10 @@ public class RealTimeAppDetector {
     }
 
     private String generateRiskReason(String pkg, AppRiskProfile profile, float risk) {
-        if (risk >= 0.7f) {
-            return "High addiction risk - " + profile.riskFactors[0];
-        } else if (risk >= 0.4f) {
-            return "Moderate risk - " + profile.primaryConcern;
-        } else {
-            return "Low risk - healthy usage pattern";
+        if (UsageIntelligence.isProductivePackage(pkg)) {
+            return "Productive session detected";
         }
+        return profile.primaryConcern;
     }
 
     // ========================= RISK PROFILES =========================
@@ -352,50 +259,70 @@ public class RealTimeAppDetector {
     private Map<String, AppRiskProfile> initializeAppRiskProfiles() {
         Map<String, AppRiskProfile> profiles = new HashMap<>();
 
-        profiles.put("com.instagram.android", new AppRiskProfile(
-                0, 0.8f, "Infinite scroll addiction",
-                new String[]{"Infinite scroll mechanism", "Dopamine-driven engagement"}));
+        // High Risk - Social
+        profiles.put("com.instagram.android", new AppRiskProfile(RiskThresholds.CATEGORY_SOCIAL, 0.4f, "Algorithm-driven feed"));
+        profiles.put("com.zhiliaoapp.musically", new AppRiskProfile(RiskThresholds.CATEGORY_SOCIAL, 0.4f, "Short-form video loops"));
+        profiles.put("com.facebook.katana", new AppRiskProfile(RiskThresholds.CATEGORY_SOCIAL, 0.35f, "Infinite scrolling"));
+        profiles.put("com.twitter.android", new AppRiskProfile(RiskThresholds.CATEGORY_SOCIAL, 0.3f, "Real-time doomscrolling"));
+        profiles.put("com.snapchat.android", new AppRiskProfile(RiskThresholds.CATEGORY_SOCIAL, 0.3f, "Streak maintenance compulsion"));
 
-        profiles.put("com.zhiliaoapp.musically", new AppRiskProfile(
-                0, 0.9f, "Short-form video addiction",
-                new String[]{"Endless video stream", "Algorithmic feed"}));
+        // Entertainment
+        profiles.put("com.google.android.youtube", new AppRiskProfile(RiskThresholds.CATEGORY_ENTERTAINMENT, 0.3f, "Autoplay recommendation rabbit holes"));
+        profiles.put("com.netflix.mediaclient", new AppRiskProfile(RiskThresholds.CATEGORY_ENTERTAINMENT, 0.25f, "Binge-watching tendency"));
 
-        profiles.put("com.facebook.katana", new AppRiskProfile(
-                0, 0.7f, "Social validation seeking",
-                new String[]{"News feed algorithm", "Social interactions"}));
+        // Productive Apps (Intelligence Layer overrides risks, but base profiles help)
+        profiles.put("com.google.android.apps.docs.editors.docs", new AppRiskProfile(RiskThresholds.CATEGORY_PRODUCTIVITY, 0.05f, "Focused document editing"));
+        profiles.put("com.google.android.apps.docs", new AppRiskProfile(RiskThresholds.CATEGORY_PRODUCTIVITY, 0.05f, "File management"));
+        profiles.put("com.slack", new AppRiskProfile(RiskThresholds.CATEGORY_PRODUCTIVITY, 0.1f, "Workplace communication"));
+        profiles.put("notion.id", new AppRiskProfile(RiskThresholds.CATEGORY_PRODUCTIVITY, 0.05f, "Knowledge base work"));
 
-        profiles.put("com.snapchat.android", new AppRiskProfile(
-                0, 0.7f, "Streak maintenance compulsion",
-                new String[]{"Streak pressure", "FOMO triggers"}));
-
-        profiles.put("com.twitter.android", new AppRiskProfile(
-                0, 0.6f, "Information overload",
-                new String[]{"Real-time updates", "Infinite timeline"}));
-
-        profiles.put("com.google.android.youtube", new AppRiskProfile(
-                2, 0.7f, "Binge-watching tendency",
-                new String[]{"Autoplay feature", "Recommendation algorithm"}));
-
-        profiles.put("com.netflix.mediaclient", new AppRiskProfile(
-                2, 0.6f, "Episode binge-watching",
-                new String[]{"Autoplay next episode", "Binge-friendly interface"}));
-
-        profiles.put("com.android.chrome", new AppRiskProfile(
-                1, 0.3f, "Web browsing",
-                new String[]{"General web usage"}));
-
-        profiles.put("com.whatsapp", new AppRiskProfile(
-                6, 0.3f, "Communication necessity",
-                new String[]{"Social obligation"}));
+        // Comms
+        profiles.put("com.whatsapp", new AppRiskProfile(RiskThresholds.CATEGORY_COMMUNICATION, 0.15f, "Social obligations"));
+        profiles.put("com.android.chrome", new AppRiskProfile(RiskThresholds.CATEGORY_UTILITIES, 0.15f, "General web browsing"));
 
         return profiles;
     }
 
-    private AppRiskProfile createDefaultRiskProfile() {
-        return new AppRiskProfile(
-                5, 0.2f, "Unknown app",
-                new String[]{"Standard usage pattern"}
-        );
+    private AppRiskProfile getDynamicRiskProfile(String pkg) {
+        int category = RiskThresholds.CATEGORY_UTILITIES;
+        float baseRisk = 0.2f;
+        String reason = "Generic application usage";
+
+        // Query PackageManager for application category (Android O+)
+        try {
+            ApplicationInfo info = packageManager.getApplicationInfo(pkg, 0);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                switch (info.category) {
+                    case ApplicationInfo.CATEGORY_GAME:
+                        category = RiskThresholds.CATEGORY_GAMES;
+                        baseRisk = 0.3f;
+                        reason = "Gaming session";
+                        break;
+                    case ApplicationInfo.CATEGORY_SOCIAL:
+                        category = RiskThresholds.CATEGORY_SOCIAL;
+                        baseRisk = 0.35f;
+                        reason = "Social interaction";
+                        break;
+                    case ApplicationInfo.CATEGORY_VIDEO:
+                        category = RiskThresholds.CATEGORY_ENTERTAINMENT;
+                        break;
+                    case ApplicationInfo.CATEGORY_PRODUCTIVITY:
+                        category = RiskThresholds.CATEGORY_PRODUCTIVITY;
+                        baseRisk = 0.05f;
+                        reason = "Productive usage";
+                        break;
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // Supplemental check via UsageIntelligence
+        if (UsageIntelligence.isProductivePackage(pkg)) {
+            category = RiskThresholds.CATEGORY_PRODUCTIVITY;
+            baseRisk = 0.05f;
+            reason = "Productive usage";
+        }
+
+        return new AppRiskProfile(category, baseRisk, reason);
     }
 
     // ========================= DATA CLASSES =========================
@@ -407,19 +334,12 @@ public class RealTimeAppDetector {
         public final float addictionRisk;
         public final String riskReason;
 
-        public CurrentAppInfo(String packageName, String displayName,
-                              int category, float addictionRisk, String riskReason) {
+        public CurrentAppInfo(String packageName, String displayName, int category, float addictionRisk, String riskReason) {
             this.packageName = packageName;
             this.displayName = displayName;
             this.category = category;
             this.addictionRisk = addictionRisk;
             this.riskReason = riskReason;
-        }
-
-        public String getRiskLevel() {
-            if (addictionRisk >= 0.7f) return "HIGH";
-            else if (addictionRisk >= 0.4f) return "MEDIUM";
-            else return "LOW";
         }
     }
 
@@ -427,14 +347,11 @@ public class RealTimeAppDetector {
         public final int category;
         public final float baseRisk;
         public final String primaryConcern;
-        public final String[] riskFactors;
 
-        public AppRiskProfile(int category, float baseRisk,
-                              String primaryConcern, String[] riskFactors) {
+        public AppRiskProfile(int category, float baseRisk, String primaryConcern) {
             this.category = category;
             this.baseRisk = baseRisk;
             this.primaryConcern = primaryConcern;
-            this.riskFactors = riskFactors;
         }
     }
 }

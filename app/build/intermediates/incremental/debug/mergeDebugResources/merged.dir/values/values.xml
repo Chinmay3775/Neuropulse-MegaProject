@@ -632,8 +632,14 @@
     <color name="abc_search_url_text_normal">#7fa87f</color>
     <color name="abc_search_url_text_pressed">@android:color/black</color>
     <color name="abc_search_url_text_selected">@android:color/black</color>
+    <color name="accent_amber">#D29922</color>
+    <color name="accent_blue">#58A6FF</color>
+    <color name="accent_cyan">#39D2C0</color>
+    <color name="accent_green">#3FB950</color>
     <color name="accent_material_dark">@color/material_deep_teal_200</color>
     <color name="accent_material_light">@color/material_deep_teal_500</color>
+    <color name="accent_purple">#BC8CFF</color>
+    <color name="accent_red">#F85149</color>
     <color name="androidx_core_ripple_material_light">#1f000000</color>
     <color name="androidx_core_secondary_text_default_material_light">#8a000000</color>
     <color name="background_floating_material_dark">@color/material_grey_800</color>
@@ -641,6 +647,11 @@
     <color name="background_light">#FAFAFA</color>
     <color name="background_material_dark">@color/material_grey_850</color>
     <color name="background_material_light">@color/material_grey_50</color>
+    <color name="bg_card">#21262D</color>
+    <color name="bg_card_border">#30363D</color>
+    <color name="bg_elevated">#2D333B</color>
+    <color name="bg_primary">#0D1117</color>
+    <color name="bg_surface">#161B22</color>
     <color name="black">#000000</color>
     <color name="bright_foreground_disabled_material_dark">#80ffffff</color>
     <color name="bright_foreground_disabled_material_light">#80000000</color>
@@ -650,6 +661,9 @@
     <color name="bright_foreground_material_light">@android:color/black</color>
     <color name="button_material_dark">#ff5a595b</color>
     <color name="button_material_light">#ffd6d7d7</color>
+    <color name="calming_accent">#5B86E5</color>
+    <color name="calming_bg">#0A1628</color>
+    <color name="calming_glow">#1A3A6B</color>
     <color name="cardview_dark_background">#FF424242</color>
     <color name="cardview_light_background">#FFFFFFFF</color>
     <color name="cardview_shadow_end_color">#03000000</color>
@@ -955,6 +969,9 @@
     <color name="red">#D32F2F</color>
     <color name="ripple_material_dark">#33ffffff</color>
     <color name="ripple_material_light">#1f000000</color>
+    <color name="risk_high">#F85149</color>
+    <color name="risk_low">#3FB950</color>
+    <color name="risk_medium">#D29922</color>
     <color name="secondary_text_default_material_dark">#b3ffffff</color>
     <color name="secondary_text_default_material_light">#8a000000</color>
     <color name="secondary_text_disabled_material_dark">#36ffffff</color>
@@ -965,6 +982,9 @@
     <color name="switch_thumb_normal_material_light">#fff1f1f1</color>
     <color name="teal_200">#03DAC5</color>
     <color name="teal_700">#018786</color>
+    <color name="text_muted">#6E7681</color>
+    <color name="text_primary">#F0F6FC</color>
+    <color name="text_secondary">#8B949E</color>
     <color name="tooltip_background_dark">#e6616161</color>
     <color name="tooltip_background_light">#e6FFFFFF</color>
     <color name="white">#FFFFFF</color>
@@ -6472,22 +6492,31 @@
     <item name="windowActionBar">false</item>
     <item name="windowNoTitle">true</item>
   </style>
-    <style name="Theme.Neuropulse" parent="Theme.MaterialComponents.Light.NoActionBar">
-        
-        <item name="colorPrimary">@color/teal_700</item>
-        <item name="colorPrimaryVariant">@color/teal_200</item>
-        <item name="colorOnPrimary">@color/white</item>
-
-        
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/white</item>
-
-        
-        <item name="android:windowBackground">@color/background_light</item>
-        <item name="android:textColor">@color/black</item>
-
-        
+    <style name="Theme.Neuropulse" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/accent_blue</item>
+        <item name="colorPrimaryVariant">@color/accent_purple</item>
+        <item name="colorOnPrimary">@color/text_primary</item>
+        <item name="colorSecondary">@color/accent_cyan</item>
+        <item name="colorSecondaryVariant">@color/accent_green</item>
+        <item name="colorOnSecondary">@color/text_primary</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:statusBarColor">@color/bg_primary</item>
+        <item name="android:navigationBarColor">@color/bg_primary</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Theme.Neuropulse.Alert" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.7</item>
+    </style>
+    <style name="Theme.Neuropulse.Blocking" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowBackground">@color/calming_bg</item>
+        <item name="android:statusBarColor">@color/calming_bg</item>
+        <item name="android:navigationBarColor">@color/calming_bg</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
@@ -9079,10 +9108,31 @@
     <item name="android:textAppearance">@style/TextAppearance.MaterialComponents.Tooltip</item>
     <item name="shapeAppearance">@style/ShapeAppearance.MaterialComponents.Tooltip</item>
   </style>
+    <style name="Widget.Neuropulse.Button" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">14dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="backgroundTint">@color/accent_blue</item>
+    </style>
+    <style name="Widget.Neuropulse.Button.Danger" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">14dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="backgroundTint">@color/accent_red</item>
+    </style>
+    <style name="Widget.Neuropulse.GlassCard">
+        <item name="android:background">@drawable/card_glass_bg</item>
+        <item name="android:padding">20dp</item>
+        <item name="android:layout_margin">12dp</item>
+        <item name="android:elevation">0dp</item>
+    </style>
     <style name="Widget.Neuropulse.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="cornerRadius">16dp</item>
-        <item name="strokeColor">@color/teal_700</item>
-        <item name="strokeWidth">2dp</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="strokeColor">@color/bg_card_border</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textAllCaps">false</item>
     </style>
     <style name="Widget.Support.CoordinatorLayout" parent="android:Widget">
         <item name="statusBarBackground">#000000</item>

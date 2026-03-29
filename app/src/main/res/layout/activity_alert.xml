@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/alert_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="28dp">
+
+    <!-- Risk indicator bar -->
+    <View
+        android:id="@+id/riskIndicatorBar"
+        android:layout_width="60dp"
+        android:layout_height="4dp"
+        android:layout_marginBottom="20dp"
+        android:background="@color/accent_red" />
+
+    <!-- Warning icon -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="⚠️"
+        android:textSize="48sp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/alertTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time for a Break"
+        android:textColor="@color/text_primary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="8dp" />
+
+    <!-- App name and duration -->
+    <TextView
+        android:id="@+id/alertAppInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You've been on Instagram for 45 min"
+        android:textColor="@color/text_secondary"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Risk reason -->
+    <TextView
+        android:id="@+id/alertReason"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="High dopamine stimulation detected"
+        android:textColor="@color/accent_amber"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:layout_marginBottom="4dp" />
+
+    <!-- Escalation warning -->
+    <TextView
+        android:id="@+id/escalationWarning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@color/accent_red"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="4dp" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="20dp"
+        android:background="@color/bg_card_border" />
+
+    <!-- Suggestion -->
+    <TextView
+        android:id="@+id/alertSuggestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 Try taking a 5-minute walk"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:background="@drawable/card_glass_bg"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Take a Break Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTakeBreak"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="Take a Break"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        android:backgroundTint="@color/accent_green"
+        android:layout_marginBottom="12dp"
+        app:cornerRadius="14dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    <!-- Continue Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnContinue"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Continue Using"
+        android:textColor="@color/text_muted"
+        android:textSize="14sp"
+        android:textAllCaps="false"
+        app:strokeColor="@color/bg_card_border"
+        app:strokeWidth="1dp"
+        app:cornerRadius="14dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+</LinearLayout>

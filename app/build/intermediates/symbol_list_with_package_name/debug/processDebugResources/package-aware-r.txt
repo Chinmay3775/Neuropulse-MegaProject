@@ -2923,6 +2923,7 @@ drawable btn_radio_off_mtrl
 drawable btn_radio_off_to_on_mtrl_animation
 drawable btn_radio_on_mtrl
 drawable btn_radio_on_to_off_mtrl_animation
+drawable circular_progress
 drawable design_fab_background
 drawable design_ic_visibility
 drawable design_ic_visibility_off
@@ -3148,12 +3149,13 @@ id coordinator
 id cos
 id counterclockwise
 id cradle
+id currentAppText
 id currentState
 id custom
 id customPanel
 id cut
+id dashboardContainer
 id date_picker_actions
-id debugBtn
 id decelerate
 id decelerateAndComplete
 id decor_content_parent
@@ -3352,6 +3354,7 @@ id path
 id pathRelative
 id peekHeight
 id percent
+id permissionContainer
 id permissionsBtn
 id pin
 id pooling_container_listener_holder_tag
@@ -3370,6 +3373,9 @@ id right
 id rightToLeft
 id right_icon
 id right_side
+id riskLevelText
+id riskProgressBar
+id riskScoreText
 id rounded
 id row_index_key
 id save_non_transition_alpha
@@ -3438,12 +3444,10 @@ id src_over
 id standard
 id start
 id startHorizontal
-id startMonitoringBtn
 id startToEnd
 id startVertical
 id staticLayout
 id staticPostLayout
-id statusText
 id stop
 id stretch
 id submenuarrow
@@ -3633,7 +3637,6 @@ layout abc_search_dropdown_item_icons_2line
 layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
-layout activity_enhanced_debug
 layout activity_main
 layout activity_permission_helper
 layout custom_dialog

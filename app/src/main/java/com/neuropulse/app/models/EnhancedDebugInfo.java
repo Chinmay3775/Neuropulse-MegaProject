@@ -1,16 +1,25 @@
 package com.neuropulse.app.models;
 
 import com.neuropulse.app.features.RealTimeAppDetector;
+import com.neuropulse.app.features.UsageIntelligence;
 import com.neuropulse.app.ml.AddictionPredictor;
+import com.neuropulse.app.ml.RiskThresholds;
 
 /**
- * Debug-only model for displaying live ML + rule-based signals
- * NO database, NO historical context
+ * Debug-only model for displaying live ML + rule-based signals.
+ * Enhanced to show ML outputs, risk trends, and session limits.
  */
 public class EnhancedDebugInfo {
 
     public String[] featureLabels;
     public String[] featureValues;
+
+    // Direct values for dashboard binding
+    public float rawDopamineRisk;
+    public String rawRiskLevel;
+    public String rawAppName;
+    public String usageClass;
+    public String lastTrend;
 
     private EnhancedDebugInfo() {}
 
@@ -23,81 +32,71 @@ public class EnhancedDebugInfo {
     ) {
         EnhancedDebugInfo info = new EnhancedDebugInfo();
 
+        info.rawDopamineRisk = result.dopamineRisk;
+        info.rawRiskLevel = result.riskLevel;
+        info.rawAppName = app.displayName;
+        info.usageClass = UsageIntelligence.classifyUsage(app.category, result.dopamineRisk);
+
+        if (features.riskTrend > 0f) info.lastTrend = "↑";
+        else if (features.riskTrend < 0f) info.lastTrend = "↓";
+        else info.lastTrend = "→";
+
+        // Collect string factor array if available
+        String mainFactor = "None";
+        if (result.contributingFactors != null && !result.contributingFactors.isEmpty()) {
+            mainFactor = result.contributingFactors.get(0);
+        }
+
         info.featureLabels = new String[]{
-                "📱 Current App",
-                "📂 App Category",
+                "📱 App Category",
+                "📊 Usage Classification",
+                "📈 ML Dopamine Prob",
+                "🤖 ML Addiction State",
                 "⏱ Session Duration",
-                "📜 Scrolls / Minute",
-                "🔁 Same App Time",
-                "🕒 Time of Day",
-                "🎮 Binge Flag",
-                "🧠 Dopamine Risk",
-                "⚠️ Risk Level",
-                "🎯 Addiction State",
-                "💡 Recommendation",
-                "📊 Confidence"
+                "📜 Inferred Intensity",
+                "🔁 Apps Switched",
+                "🔑 Unlocks",
+                "🎯 Primary Risk Factor",
+                "💡 Action Required",
+                "📉 Trend"
         };
+
+        String mlAddictionValue = "N/A";
+        if (result.mlAddictionProbs != null && result.mlAddictionProbs.length == 3) {
+             float maxProb = 0f;
+             int maxIdx = 0;
+             for (int i=0; i<3; i++) {
+                if(result.mlAddictionProbs[i] > maxProb) {
+                    maxProb = result.mlAddictionProbs[i];
+                    maxIdx = i;
+                }
+             }
+             mlAddictionValue = (maxIdx == 2 ? "High Risk" : maxIdx == 1 ? "At Risk" : "Healthy") + 
+                                String.format(" (%.0f%%)", maxProb * 100);
+        }
 
         info.featureValues = new String[]{
-                app.displayName,
-                getCategoryName(features.appCategory),
+                RiskThresholds.getCategoryName(features.appCategory),
+                info.usageClass,
+                result.mlDopamineRisk >= 0f ? String.format("%.1f%%", result.mlDopamineRisk * 100f) : "Rule Engine Fallback",
+                mlAddictionValue,
                 formatDuration(features.sessionDurationMs),
-                String.format("%.1f", features.scrollsPerMinute),
-                features.consecutiveSameAppMin + " min",
-                formatTime(features.timeOfDay),
-                features.bingeFlag == 1 ? "YES" : "NO",
-                String.format("%.2f", result.dopamineRisk),
-                getRiskLevel(result.dopamineRisk),
-                getAddictionState(result.addictionLevel),
-                result.dopamineRisk >= 0.6f
-                        ? "Take a short break or switch activity"
-                        : "Usage looks healthy"
+                String.format("%.1f/min", features.scrollsPerMinute),
+                String.valueOf(features.appSwitchCount),
+                String.valueOf(features.unlockCount),
+                mainFactor,
+                result.dopamineRisk >= RiskThresholds.ALERT_THRESHOLD ? "Take a short break" : "Healthy, continue",
+                info.lastTrend
         };
-
 
         return info;
     }
 
     // ================= HELPERS =================
 
-    private static String getRiskLevel(float risk) {
-        if (risk >= 0.7f) return "HIGH";
-        if (risk >= 0.4f) return "MEDIUM";
-        return "LOW";
-    }
-
-    private static String getAddictionState(int level) {
-        switch (level) {
-            case 2: return "High Risk";
-            case 1: return "At Risk";
-            default: return "Healthy";
-        }
-    }
-
     private static String formatDuration(long ms) {
         long sec = ms / 1000;
         long min = sec / 60;
         return min + " min";
-    }
-
-    private static String formatTime(float timeOfDay) {
-        int hour = (int) (timeOfDay * 24);
-        if (hour < 6) return "Night";
-        if (hour < 12) return "Morning";
-        if (hour < 18) return "Afternoon";
-        return "Evening";
-    }
-
-    private static String getCategoryName(int c) {
-        switch (c) {
-            case 0: return "Social Media";
-            case 1: return "Productivity";
-            case 2: return "Entertainment";
-            case 3: return "Games";
-            case 4: return "News";
-            case 5: return "Shopping";
-            case 6: return "Communication";
-            default: return "Other";
-        }
     }
 }
