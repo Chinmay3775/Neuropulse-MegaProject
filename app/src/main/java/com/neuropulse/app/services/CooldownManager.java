@@ -47,13 +47,18 @@ public class CooldownManager {
         Set<String> blockedCategories = new HashSet<>();
         blockedCategories.add(String.valueOf(category));
 
+        // Ensure category group mapping is properly enforced
         for (int[] group : CATEGORY_GROUPS) {
+            boolean inGroup = false;
             for (int cat : group) {
                 if (cat == category) {
-                    for (int groupCat : group) {
-                        blockedCategories.add(String.valueOf(groupCat));
-                    }
+                    inGroup = true;
                     break;
+                }
+            }
+            if (inGroup) {
+                for (int groupCat : group) {
+                    blockedCategories.add(String.valueOf(groupCat));
                 }
             }
         }

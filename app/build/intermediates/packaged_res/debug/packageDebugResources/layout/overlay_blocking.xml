@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Full-screen blocking overlay — shown via WindowManager during cooldown -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/calming_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <!-- Breathing circle -->
+    <View
+        android:id="@+id/overlayBreathingCircle"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:background="@drawable/breathing_circle"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Breathing instruction -->
+    <TextView
+        android:id="@+id/overlayBreathingTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Box Breathing"
+        android:textColor="@color/text_primary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="6dp" />
+
+    <TextView
+        android:id="@+id/overlayBreathingInstructions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Inhale 4s → Hold 4s → Exhale 4s → Hold 4s"
+        android:textColor="@color/calming_accent"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:layout_marginBottom="28dp" />
+
+    <!-- Countdown timer -->
+    <TextView
+        android:id="@+id/overlayCooldownTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10:00"
+        android:textColor="@color/text_primary"
+        android:textSize="52sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="COOLDOWN REMAINING"
+        android:textColor="@color/text_muted"
+        android:textSize="11sp"
+        android:letterSpacing="0.15"
+        android:layout_marginBottom="28dp" />
+
+    <!-- Cooldown progress -->
+    <ProgressBar
+        android:id="@+id/overlayCooldownProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:max="100"
+        android:progress="100"
+        android:progressTint="@color/calming_accent"
+        android:progressBackgroundTint="@color/bg_card"
+        android:layout_marginBottom="28dp" />
+
+    <!-- Motivational quote -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_glass_bg"
+        android:orientation="vertical"
+        android:padding="18dp"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/overlayQuoteText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="&quot;Almost everything will work again if you unplug it for a few minutes… including you.&quot;"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:fontFamily="serif"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp" />
+    </LinearLayout>
+
+    <!-- Suggestion -->
+    <TextView
+        android:id="@+id/overlaySuggestionText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 Try reading a chapter of a book"
+        android:textColor="@color/text_muted"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Open NeuroPulse -->
+    <Button
+        android:id="@+id/overlayBtnOpenNeuropulse"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="Open NeuroPulse"
+        android:textColor="@color/calming_accent"
+        android:textAllCaps="false"
+        android:textSize="13sp"
+        android:backgroundTint="@color/bg_card" />
+
+</LinearLayout>

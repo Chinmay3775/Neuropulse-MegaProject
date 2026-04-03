@@ -89,13 +89,15 @@ public class AlertActivity extends Activity {
 
         // Escalation warning
         int continueCount = responseTracker.getConsecutiveContinueCount();
-        if (continueCount >= 2) {
+        if (continueCount >= 1) {
             escalationView.setVisibility(View.VISIBLE);
-            int remaining = RiskThresholds.MAX_CONTINUES_BEFORE_ESCALATION - continueCount;
+            int remaining = RiskThresholds.MAX_STRIKES - continueCount;
             if (remaining <= 0) {
-                escalationView.setText("⚠ Forced cooldown will activate now");
+                escalationView.setText("⚠️ FINAL STRIKE: Access will be blocked");
+                escalationView.setTextColor(getColor(R.color.accent_red));
             } else {
-                escalationView.setText("⚠ " + remaining + " more continue(s) before forced cooldown");
+                escalationView.setText("⚠️ Strike " + continueCount + " of " + RiskThresholds.MAX_STRIKES + 
+                        " (Next will block app)");
             }
         }
 

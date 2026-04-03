@@ -83,7 +83,7 @@
             android:id="@+id/quoteText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="\"Almost everything will work again if you unplug it for a few minutes… including you.\""
+            android:text="&quot;Almost everything will work again if you unplug it for a few minutes… including you.&quot;"
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             android:fontFamily="serif"

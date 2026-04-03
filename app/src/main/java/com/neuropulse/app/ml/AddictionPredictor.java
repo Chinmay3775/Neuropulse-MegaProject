@@ -46,6 +46,9 @@ public class AddictionPredictor {
         }
     }
 
+    private final List<Float> scoreHistory = new ArrayList<>();
+    private static final int HISTORY_WINDOW = 5;
+
     // ================= MAIN PREDICT METHOD =================
     public PredictionResult predict(SessionFeatures f) {
 
@@ -55,7 +58,7 @@ public class AddictionPredictor {
         // -------- ML INFERENCE --------
         float mlDopamine = -1f;
         float[] mlAddiction = null;
-        float finalRisk = ruleRisk;
+        float rawFinalRisk = ruleRisk;
 
         if (mlHelper.isModelLoaded()) {
             float[] featureArray = f.toFeatureArray();
@@ -63,34 +66,59 @@ public class AddictionPredictor {
             mlDopamine = mlHelper.predictDopamineRisk(featureArray);
             mlAddiction = mlHelper.predictAddictionLevel(featureArray);
 
-            // Blend rule-based and ML predictions
+            // Prioritize ML predictions ONLY when confident or high-risk
             if (mlDopamine >= 0f) {
-                // 40% rule-based + 60% ML for best of both
-                finalRisk = 0.4f * ruleRisk + 0.6f * mlDopamine;
+                if (mlDopamine < 0) {
+                    rawFinalRisk = ruleRisk;
+                } else {
+                    rawFinalRisk = (0.6f * mlDopamine) + (0.4f * ruleRisk);
+                }
+                
+                if (mlDopamine >= RiskThresholds.ALERT_THRESHOLD) {
+                    if (!factors.contains("AI identified aggressive engagement pattern")) {
+                        factors.add("AI identified aggressive engagement pattern");
+                    }
+                }
             }
 
-            // If addiction model disagrees strongly, adjust
+            // High-confidence addiction classification
             if (mlAddiction != null) {
-                float mlHighRiskProb = mlAddiction[2]; // P(high risk)
-                if (mlHighRiskProb > 0.7f && finalRisk < RiskThresholds.MEDIUM_RISK) {
-                    finalRisk = Math.max(finalRisk, RiskThresholds.MEDIUM_RISK);
-                    factors.add("ML model detected high-risk pattern");
+                float mlHighRiskProb = mlAddiction[2];
+                if (mlHighRiskProb > 0.8f) {
+                    rawFinalRisk = Math.max(rawFinalRisk, RiskThresholds.HIGH_RISK);
+                    factors.add("AI detected chronic doomscrolling signals");
                 }
             }
         }
 
-        finalRisk = Math.max(0f, Math.min(1f, finalRisk));
+        // Apply Temporal Smoothing (Rolling Average)
+        float smoothedRisk = applyTemporalSmoothing(rawFinalRisk);
+        smoothedRisk = Math.max(0f, Math.min(1f, smoothedRisk));
 
-        int addictionLevel = RiskThresholds.getAddictionLevel(finalRisk);
-        String reason = buildReason(f, finalRisk, factors);
+        int addictionLevel = RiskThresholds.getAddictionLevel(smoothedRisk);
+        String reason = buildReason(f, smoothedRisk, factors);
 
-        Log.d(TAG, String.format("Rule=%.3f ML=%.3f Final=%.3f Level=%d",
-                ruleRisk, mlDopamine, finalRisk, addictionLevel));
+        Log.d(TAG, String.format("Rule=%.3f ML=%.3f Raw=%.3f Smoothed=%.3f Level=%d",
+                ruleRisk, mlDopamine, rawFinalRisk, smoothedRisk, addictionLevel));
 
         return new PredictionResult(
-                finalRisk, addictionLevel, reason,
+                smoothedRisk, addictionLevel, reason,
                 mlDopamine, mlAddiction, factors
         );
+    }
+
+    public void resetHistory() {
+        scoreHistory.clear();
+    }
+
+    private float applyTemporalSmoothing(float currentRisk) {
+        scoreHistory.add(currentRisk);
+        if (scoreHistory.size() > HISTORY_WINDOW) {
+            scoreHistory.remove(0);
+        }
+        float sum = 0;
+        for (float r : scoreHistory) sum += r;
+        return sum / scoreHistory.size();
     }
 
     // ================= RULE-BASED SCORING =================
@@ -111,7 +139,7 @@ public class AddictionPredictor {
             factors.add(RiskThresholds.getCategoryName(f.appCategory) + " app detected");
         }
 
-        // 3. INTERACTION INTENSITY
+        // 3. INTERACTION INTENSITY (now from real scroll data when available)
         float scrollRisk = sigmoid(f.scrollsPerMinute, 10f, 5f) * 0.18f;
         risk += scrollRisk;
         if (f.scrollsPerMinute > 12f) factors.add("High interaction intensity");
@@ -137,16 +165,41 @@ public class AddictionPredictor {
             factors.add("Binge session detected (>2h)");
         }
 
-        // 7. UNLOCK FREQUENCY (new)
+        // 7. UNLOCK FREQUENCY
         if (f.unlockFrequency > 25f) {
             risk += 0.10f;
             factors.add("Frequent device unlocks");
         }
 
-        // 8. SESSION COUNT (new — multiple sessions = compulsive checking)
+        // 8. SESSION COUNT (multiple sessions = compulsive checking)
         if (f.sessionCount > 10) {
             risk += 0.08f;
             factors.add("Frequent app reopening today");
+        }
+
+        // 9. RAPID SCROLL BURSTS (NEW — strong doomscrolling signal)
+        //    A burst = 6+ scroll events in 5 seconds (erratic flicking)
+        if (f.rapidBurstCount >= 3) {
+            risk += 0.15f;
+            factors.add("Rapid scroll bursts detected (" + f.rapidBurstCount + ")");
+        } else if (f.rapidBurstCount >= 1) {
+            risk += 0.07f;
+            factors.add("Intermittent rapid scrolling");
+        }
+
+        // 10. SCROLL CADENCE VARIANCE (NEW — false positive reducer)
+        //     Low variance = steady reading pace (educational). High = erratic (doomscrolling).
+        //     Only apply for productive/utility categories to reduce false alarms.
+        if (RiskThresholds.isProductiveCategory(f.appCategory)
+                && f.scrollCadenceVariance < 50000f
+                && f.scrollCadenceVariance > 0f) {
+            // Steady scroll pattern on a productive app — apply discount
+            risk *= 0.6f;
+            factors.add("Steady reading pattern (educational)");
+        } else if (f.scrollCadenceVariance > 500000f) {
+            // Very erratic scrolling — boost risk regardless of category
+            risk += 0.08f;
+            factors.add("Erratic scroll pattern detected");
         }
 
         return Math.min(1f, risk);

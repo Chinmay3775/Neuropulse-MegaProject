@@ -26,6 +26,12 @@ public class SessionFeatures {
     public int    sessionCount;        // sessions today
     public float  riskTrend;           // +1 rising, 0 stable, -1 falling
 
+    // ================= AUTHENTIC SCROLL METRICS (from ScrollTracker) =================
+    /** Variance of inter-scroll intervals. High = erratic (doomscrolling). Low = steady (reading). */
+    public float  scrollCadenceVariance;
+    /** Number of rapid scroll bursts (6+ scrolls in 5 seconds). Strong doomscrolling indicator. */
+    public int    rapidBurstCount;
+
     public SessionFeatures(
             int appCategory,
             long sessionDurationMs,

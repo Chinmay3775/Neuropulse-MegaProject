@@ -12,6 +12,8 @@ import android.util.Log;
 
 import com.neuropulse.app.ml.RiskThresholds;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,8 +226,8 @@ public class RealTimeAppDetector {
             return lastStablePackage; // wait until stable
         }
 
-        // We've seen it before. Has it been stable long enough? (1 second)
-        if (now - candidateSince >= 1000) {
+        // We've seen it before. Has it been stable long enough? (800ms)
+        if (now - candidateSince >= 800) {
             Log.i(TAG, "🔄 App stabilized: " + lastStablePackage + " → " + candidate);
             lastStablePackage = candidate;
             candidatePackage = null;
@@ -234,14 +236,46 @@ public class RealTimeAppDetector {
         return lastStablePackage;
     }
 
+    /**
+     * Immediately updates the stable package, bypassing the stabilization delay.
+     * Useful when another component (like AccessibilityService) has already confirmed the change.
+     */
+    public void forcePackageUpdate(String packageName) {
+        if (packageName != null && !packageName.equals("unknown")) {
+            this.lastStablePackage = packageName;
+            this.candidatePackage = null;
+            this.candidateSince = 0;
+            Log.d(TAG, "🚀 Forcing stable package: " + packageName);
+        }
+    }
+
+    private static final Map<String, String> FALLBACK_NAMES = new HashMap<>();
+    static {
+        FALLBACK_NAMES.put("com.instagram.android", "Instagram");
+        FALLBACK_NAMES.put("com.zhiliaoapp.musically", "TikTok");
+        FALLBACK_NAMES.put("com.facebook.katana", "Facebook");
+        FALLBACK_NAMES.put("com.twitter.android", "X (Twitter)");
+        FALLBACK_NAMES.put("com.snapchat.android", "Snapchat");
+        FALLBACK_NAMES.put("com.google.android.youtube", "YouTube");
+        FALLBACK_NAMES.put("com.netflix.mediaclient", "Netflix");
+        FALLBACK_NAMES.put("com.reddit.frontpage", "Reddit");
+        FALLBACK_NAMES.put("com.whatsapp", "WhatsApp");
+        FALLBACK_NAMES.put("com.android.chrome", "Chrome");
+        FALLBACK_NAMES.put("com.neuropulse.app", "Neuropulse");
+    }
+
     private String getAppDisplayName(String packageName) {
+        if (FALLBACK_NAMES.containsKey(packageName)) {
+            return FALLBACK_NAMES.get(packageName);
+        }
         try {
-            ApplicationInfo info = packageManager.getApplicationInfo(packageName, 0);
+            ApplicationInfo info = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
             return packageManager.getApplicationLabel(info).toString();
         } catch (Exception e) {
             if (packageName != null && packageName.contains(".")) {
                 String[] parts = packageName.split("\\.");
-                return parts[parts.length - 1];
+                String name = parts[parts.length - 1];
+                return name.substring(0, 1).toUpperCase() + name.substring(1);
             }
             return packageName;
         }
@@ -252,6 +286,60 @@ public class RealTimeAppDetector {
             return "Productive session detected";
         }
         return profile.primaryConcern;
+    }
+
+    // ========================= TOP APPS =========================
+
+    public List<AppUsageStats> getTopAddictingAppsToday(int limit) {
+        List<AppUsageStats> result = new ArrayList<>();
+        if (usageStatsManager == null) return result;
+
+        long now = System.currentTimeMillis();
+        long startTime = now - TimeUnit.HOURS.toMillis(24); // Look back 24 hours
+
+        try {
+            Map<String, UsageStats> stats = usageStatsManager.queryAndAggregateUsageStats(startTime, now);
+            for (Map.Entry<String, UsageStats> entry : stats.entrySet()) {
+                String pkg = entry.getKey();
+                UsageStats usage = entry.getValue();
+
+                if (isIgnorableSystemPackage(pkg)) continue;
+
+                long duration = usage.getTotalTimeInForeground();
+                if (duration > 60000) { // Min 1 minute
+                    AppRiskProfile profile = appRiskProfiles.getOrDefault(pkg, getDynamicRiskProfile(pkg));
+                    
+                    // Only include apps that are potentially addictive
+                    if (profile.category == RiskThresholds.CATEGORY_SOCIAL || 
+                        profile.category == RiskThresholds.CATEGORY_ENTERTAINMENT ||
+                        profile.category == RiskThresholds.CATEGORY_GAMES ||
+                        FALLBACK_NAMES.containsKey(pkg)) {
+                        
+                        String name = getAppDisplayName(pkg);
+                        result.add(new AppUsageStats(pkg, name, duration, profile.baseRisk));
+                    }
+                }
+            }
+
+            // Sort descending by duration
+            Collections.sort(result, (a, b) -> Long.compare(b.totalTimeMs, a.totalTimeMs));
+
+            if (result.size() > limit) {
+                return result.subList(0, limit);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get top apps", e);
+        }
+        return result;
+    }
+
+    private boolean isIgnorableSystemPackage(String pkg) {
+        if (pkg == null || pkg.isEmpty()) return true;
+        return pkg.equals(context.getPackageName()) ||
+               pkg.equals("android") ||
+               pkg.contains("systemui") ||
+               pkg.contains("launcher") ||
+               pkg.startsWith("com.google.android.permission");
     }
 
     // ========================= RISK PROFILES =========================
@@ -352,6 +440,20 @@ public class RealTimeAppDetector {
             this.category = category;
             this.baseRisk = baseRisk;
             this.primaryConcern = primaryConcern;
+        }
+    }
+
+    public static class AppUsageStats {
+        public final String packageName;
+        public final String displayName;
+        public final long totalTimeMs;
+        public final float riskLevel;
+
+        public AppUsageStats(String packageName, String displayName, long totalTimeMs, float riskLevel) {
+            this.packageName = packageName;
+            this.displayName = displayName;
+            this.totalTimeMs = totalTimeMs;
+            this.riskLevel = riskLevel;
         }
     }
 }

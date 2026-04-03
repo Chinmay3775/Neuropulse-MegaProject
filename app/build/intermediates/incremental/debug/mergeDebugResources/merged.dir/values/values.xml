@@ -1974,6 +1974,7 @@
     <string name="abc_shareactionprovider_share_with">Share with</string>
     <string name="abc_shareactionprovider_share_with_application">Share with <ns2:g example="Mail" id="application_name">%s</ns2:g></string>
     <string name="abc_toolbar_collapse_description">Collapse</string>
+    <string name="accessibility_service_description">NeuroPulse uses this service to detect which app you are currently using and provide real-time digital wellness interventions. It monitors app transitions to help you stay mindful of your screen time.</string>
     <string name="androidx_startup" translatable="false">androidx.startup</string>
     <string name="app_name">Neuropulse</string>
     <string name="appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
@@ -9121,7 +9122,7 @@
         <item name="android:textSize">16sp</item>
         <item name="backgroundTint">@color/accent_red</item>
     </style>
-    <style name="Widget.Neuropulse.GlassCard">
+    <style name="Widget.Neuropulse.GlassCard" parent="">
         <item name="android:background">@drawable/card_glass_bg</item>
         <item name="android:padding">20dp</item>
         <item name="android:layout_margin">12dp</item>

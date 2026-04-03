@@ -53,7 +53,9 @@ public class EnhancedDebugInfo {
                 "📈 ML Dopamine Prob",
                 "🤖 ML Addiction State",
                 "⏱ Session Duration",
-                "📜 Inferred Intensity",
+                "📜 Scrolls/Min (Real)",
+                "🌊 Scroll Cadence Variance",
+                "⚡ Rapid Scroll Bursts",
                 "🔁 Apps Switched",
                 "🔑 Unlocks",
                 "🎯 Primary Risk Factor",
@@ -75,6 +77,18 @@ public class EnhancedDebugInfo {
                                 String.format(" (%.0f%%)", maxProb * 100);
         }
 
+        // Classify scroll cadence for display
+        String cadenceLabel;
+        if (features.scrollCadenceVariance <= 0f) {
+            cadenceLabel = "No data";
+        } else if (features.scrollCadenceVariance < 50000f) {
+            cadenceLabel = String.format("%.0f (Steady/Reading)", features.scrollCadenceVariance);
+        } else if (features.scrollCadenceVariance < 500000f) {
+            cadenceLabel = String.format("%.0f (Normal)", features.scrollCadenceVariance);
+        } else {
+            cadenceLabel = String.format("%.0f (Erratic!)", features.scrollCadenceVariance);
+        }
+
         info.featureValues = new String[]{
                 RiskThresholds.getCategoryName(features.appCategory),
                 info.usageClass,
@@ -82,6 +96,8 @@ public class EnhancedDebugInfo {
                 mlAddictionValue,
                 formatDuration(features.sessionDurationMs),
                 String.format("%.1f/min", features.scrollsPerMinute),
+                cadenceLabel,
+                features.rapidBurstCount > 0 ? features.rapidBurstCount + " 🔴" : "0 ✅",
                 String.valueOf(features.appSwitchCount),
                 String.valueOf(features.unlockCount),
                 mainFactor,

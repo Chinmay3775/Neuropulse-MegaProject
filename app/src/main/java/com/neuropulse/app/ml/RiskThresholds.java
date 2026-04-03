@@ -9,18 +9,23 @@ public final class RiskThresholds {
     private RiskThresholds() {} // No instantiation
 
     // ================= RISK LEVELS =================
-    public static final float HIGH_RISK = 0.70f;
-    public static final float MEDIUM_RISK = 0.40f;
-    public static final float ALERT_THRESHOLD = 0.60f;
-    public static final float ESCALATION_THRESHOLD = 0.80f;
+    public static final float HIGH_RISK = 0.80f;
+    public static final float MEDIUM_RISK = 0.50f;
+    public static final float ALERT_THRESHOLD = 0.70f;
+    public static final float ESCALATION_THRESHOLD = 0.85f;
+
+    // ================= SCANNING & ML =================
+    public static final long MONITOR_INTERVAL_MS = 2000L;      // Baseline foreground check
+    public static final long ML_PREDICTION_INTERVAL_MS = 25000L; // ML prediction every 25s
+    public static final int RISK_SMOOTHING_WINDOW = 5;         // Average last 5 predictions
 
     // ================= COOLDOWN =================
-    public static final int MIN_COOLDOWN_MINUTES = 5;
-    public static final int MAX_COOLDOWN_MINUTES = 15;
-    public static final long ALERT_COOLDOWN_MS = 30_000L; // 30s between alerts
+    public static final int MIN_COOLDOWN_MINUTES = 10;         // Request: 10 min
+    public static final int MAX_COOLDOWN_MINUTES = 15;         // Request: 5-15 min
+    public static final long ALERT_COOLDOWN_MS = 30_000L;      // 30s between alerts
 
     // ================= ESCALATION =================
-    public static final int MAX_CONTINUES_BEFORE_ESCALATION = 3;
+    public static final int MAX_STRIKES = 3;                   // 3-strike policy
 
     // ================= APP CATEGORIES =================
     public static final int CATEGORY_SOCIAL = 0;

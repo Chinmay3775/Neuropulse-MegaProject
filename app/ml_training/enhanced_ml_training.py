@@ -277,21 +277,42 @@ class DigitalWellnessML:
         self.convert_to_tflite(dopamine_model, 'dopamine_model.tflite')
         self.convert_to_tflite(addiction_model, 'addiction_model.tflite')
         
-        # Save scaler
+        # Save scaler (Python format)
         joblib.dump(self.scaler, 'feature_scaler.pkl')
         
+        # Export scaler config as JSON for Android dynamic loading
+        self.export_scaler_json('scaler_config.json')
+        
         return dopamine_model, addiction_model
+    
+    def export_scaler_json(self, filename):
+        """Export StandardScaler parameters as JSON for Android assets.
+        
+        This file is loaded by TFLiteModelHelper.java at runtime,
+        eliminating the need to hardcode scaler constants in Java.
+        """
+        import json
+        
+        scaler_config = {
+            "means": self.scaler.mean_.tolist(),
+            "scales": self.scaler.scale_.tolist()
+        }
+        
+        with open(filename, 'w') as f:
+            json.dump(scaler_config, f, indent=2)
+        
+        print(f"✅ Exported {filename} ({len(self.scaler.mean_)} features)")
     
     def convert_to_tflite(self, model, filename):
         """Convert Keras model to TensorFlow Lite"""
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
+        # Removed optimizations to prevent FULLY_CONNECTED version 12 requirement mismatch
         
         # Ensure compatibility
         converter.target_spec.supported_ops = [
-            tf.lite.OpsSet.TFLITE_BUILTINS,
-            tf.lite.OpsSet.SELECT_TF_OPS
+            tf.lite.OpsSet.TFLITE_BUILTINS
         ]
+        converter.experimental_new_converter = True
         
         tflite_model = converter.convert()
         
@@ -338,7 +359,8 @@ def main():
     print("  - dopamine_model.tflite")
     print("  - addiction_model.tflite")
     print("  - feature_scaler.pkl")
-    print("\n📱 Copy .tflite files to Android app's assets/ folder")
+    print("  - scaler_config.json  (for Android dynamic loading)")
+    print("\n📱 Copy .tflite + scaler_config.json to Android app's assets/ folder")
 
 if __name__ == "__main__":
     main()

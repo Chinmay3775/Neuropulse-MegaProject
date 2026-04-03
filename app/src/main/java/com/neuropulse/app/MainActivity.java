@@ -3,6 +3,8 @@ package com.neuropulse.app;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,10 +12,14 @@ import android.provider.Settings;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.animation.ObjectAnimator;
+import android.view.animation.DecelerateInterpolator;
 
 import com.google.android.material.button.MaterialButton;
 import com.neuropulse.app.adapters.EnhancedDebugAdapter;
@@ -23,6 +29,8 @@ import com.neuropulse.app.features.StreakManager;
 import com.neuropulse.app.ml.AddictionPredictor;
 import com.neuropulse.app.models.EnhancedDebugInfo;
 import com.neuropulse.app.models.SessionFeatures;
+import com.neuropulse.app.services.NeuropulseAccessibilityService;
+import com.neuropulse.app.services.OverlayManager;
 import com.neuropulse.app.services.UsageMonitorService;
 
 import java.util.Locale;
@@ -56,16 +64,19 @@ public class MainActivity extends AppCompatActivity {
     // UI — Stats Row
     private TextView sessionDurationText;
     private TextView interventionsText;
-    private TextView rewardLevelText;
 
     // UI — Advanced Metrics
     private EnhancedDebugAdapter debugAdapter;
+
+    // UI — Top Apps
+    private android.widget.LinearLayout topAppsContainer;
 
     // Timing state
     private long sessionStartTime = System.currentTimeMillis();
     private String currentPackage = null;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean isVisible = false;
+    private int dashboardUpdateTick = 0;
 
     // Updater Runnable
     private final Runnable uiUpdater = new Runnable() {
@@ -92,7 +103,8 @@ public class MainActivity extends AppCompatActivity {
         setupRecyclerView();
 
         permissionsBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            // Open the full permission helper
+            Intent intent = new Intent(this, PermissionHelperActivity.class);
             startActivity(intent);
         });
     }
@@ -115,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
         sessionDurationText = findViewById(R.id.sessionDurationText);
         interventionsText = findViewById(R.id.interventionsText);
-        rewardLevelText = findViewById(R.id.rewardLevelText);
+
+        topAppsContainer = findViewById(R.id.topAppsContainer);
     }
 
     private void setupRecyclerView() {
@@ -141,13 +154,16 @@ public class MainActivity extends AppCompatActivity {
             // Trigger streaks evaluation early today
             streakManager.evaluateDay();
 
-            // Start Monitoring Service
+            // Start Monitoring Service (provides foreground notification)
             Intent intent = new Intent(this, UsageMonitorService.class);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 startForegroundService(intent);
             } else {
                 startService(intent);
             }
+
+            // Check for overlay + accessibility permissions
+            checkSystemPermissions();
 
             handler.post(uiUpdater);
         }
@@ -193,9 +209,9 @@ public class MainActivity extends AppCompatActivity {
         // ML Prediction
         AddictionPredictor.PredictionResult result = addictionPredictor.predict(features);
 
-        // Update Gauge
+        // Update Gauge with smooth animation
         int progress = (int) (result.dopamineRisk * 100);
-        riskProgressBar.setProgress(progress);
+        animateRiskProgress(progress);
         riskScoreText.setText(progress + "%");
 
         int color = getColor(result.addictionLevel >= 2 ? R.color.accent_red :
@@ -229,8 +245,6 @@ public class MainActivity extends AppCompatActivity {
         com.neuropulse.app.utils.AlertResponseTracker alertTracker = new com.neuropulse.app.utils.AlertResponseTracker(this);
         interventionsText.setText(String.valueOf(alertTracker.getTodayInterventions()));
 
-        rewardLevelText.setText(streakManager.getRewardLevel());
-
         // Streak Card
         int currentStreak = streakManager.getCurrentStreak();
         streakBadgeText.setText("🔥 " + currentStreak);
@@ -239,9 +253,99 @@ public class MainActivity extends AppCompatActivity {
 
         // Recycler View
         debugAdapter.updateEnhancedInfo(info);
+
+        // Top Apps update (throttle to every 60 seconds basically, or if empty)
+        dashboardUpdateTick++;
+        if (dashboardUpdateTick % 30 == 1 || topAppsContainer.getChildCount() == 0) {
+            updateTopApps();
+        }
+    }
+
+    private void animateRiskProgress(int progress) {
+        ObjectAnimator animation = ObjectAnimator.ofInt(riskProgressBar, "progress", riskProgressBar.getProgress(), progress);
+        animation.setDuration(1200);
+        animation.setInterpolator(new DecelerateInterpolator());
+        animation.start();
+    }
+
+    private void updateTopApps() {
+        java.util.List<RealTimeAppDetector.AppUsageStats> topApps = appDetector.getTopAddictingAppsToday(3);
+        topAppsContainer.removeAllViews();
+
+        if (topApps.isEmpty()) {
+            TextView emptyText = new TextView(this);
+            emptyText.setText("No addictive app usage detected today! 🎉");
+            emptyText.setTextColor(getColor(R.color.text_muted));
+            emptyText.setTextSize(14f);
+            topAppsContainer.addView(emptyText);
+            return;
+        }
+
+        for (RealTimeAppDetector.AppUsageStats stats : topApps) {
+            android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+            row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            row.setPadding(0, 12, 0, 12);
+
+            TextView nameText = new TextView(this);
+            nameText.setText(stats.displayName);
+            nameText.setTextColor(getColor(R.color.text_primary));
+            nameText.setTextSize(16f);
+            nameText.setTypeface(null, android.graphics.Typeface.BOLD);
+
+            android.widget.LinearLayout.LayoutParams nameParams = new android.widget.LinearLayout.LayoutParams(
+                    0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+            nameText.setLayoutParams(nameParams);
+
+            TextView timeText = new TextView(this);
+            long minutes = stats.totalTimeMs / 60000;
+            long hours = minutes / 60;
+            long remMinutes = minutes % 60;
+            String timeStr = hours > 0 ? hours + "h " + remMinutes + "m" : remMinutes + "m";
+
+            timeText.setText(timeStr);
+            timeText.setTextColor(getColor(R.color.accent_amber));
+            timeText.setTextSize(15f);
+            timeText.setTypeface(null, android.graphics.Typeface.BOLD);
+
+            row.addView(nameText);
+            row.addView(timeText);
+            topAppsContainer.addView(row);
+        }
     }
 
     // ================= PERMISSIONS =================
+
+    private void checkSystemPermissions() {
+        boolean overlayOk = OverlayManager.canDrawOverlays(this);
+        boolean a11yOk = NeuropulseAccessibilityService.isAccessibilityEnabled(this);
+
+        if (!overlayOk) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Intent intent = new Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName())
+                );
+                startActivity(intent);
+            }
+        }
+
+        if (!overlayOk || !a11yOk) {
+            // Show a banner or toast prompting user to grant permissions
+            StringBuilder missing = new StringBuilder();
+            if (!overlayOk) missing.append("Draw Over Apps");
+            if (!a11yOk) {
+                if (missing.length() > 0) missing.append(", ");
+                missing.append("Accessibility Service");
+            }
+            Toast.makeText(this,
+                    "⚠️ Missing: " + missing + ". Tap 'Grant Permissions' for full protection.",
+                    Toast.LENGTH_LONG).show();
+
+            // Update the permissions button text
+            permissionsBtn.setText("Grant Required Permissions");
+            permissionsBtn.setVisibility(View.VISIBLE);
+        }
+    }
 
     private boolean hasUsageStatsPermission() {
         AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);

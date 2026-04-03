@@ -74,8 +74,8 @@ public class AlertResponseTracker {
      * Triggers on 3+ consecutive continues OR 3+ ignored alerts.
      */
     public boolean shouldEscalate() {
-        return getConsecutiveContinueCount() >= RiskThresholds.MAX_CONTINUES_BEFORE_ESCALATION
-                || getIgnoredCount() >= RiskThresholds.MAX_CONTINUES_BEFORE_ESCALATION;
+        return getConsecutiveContinueCount() >= RiskThresholds.MAX_STRIKES
+                || getIgnoredCount() >= RiskThresholds.MAX_STRIKES;
     }
 
     /**

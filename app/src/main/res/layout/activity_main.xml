@@ -3,19 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_primary"
+    android:background="@drawable/bg_premium_gradient"
     android:orientation="vertical">
 
     <!-- ===== HEADER ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/bg_surface"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="32dp"
-        android:paddingBottom="16dp">
+        android:paddingHorizontal="24dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="24dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -27,16 +26,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Neuropulse"
-                android:textColor="@color/text_primary"
-                android:textSize="22sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="26sp"
+                android:letterSpacing="0.05"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dopamine Shield · Active"
-                android:textColor="@color/accent_green"
-                android:textSize="12sp"
+                android:text="Dopamine Shield Active"
+                android:textColor="@color/accent_cyan"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium"
                 android:layout_marginTop="2dp" />
         </LinearLayout>
 
@@ -47,7 +49,8 @@
             android:background="@drawable/card_glass_bg"
             android:gravity="center"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
 
             <TextView
                 android:id="@+id/streakBadge"
@@ -55,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:text="🔥 0"
                 android:textColor="@color/accent_amber"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
@@ -70,13 +73,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true"
-            android:visibility="visible">
+            android:visibility="visible"
+            android:clipToPadding="false"
+            android:paddingBottom="24dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="24dp">
+                android:orientation="vertical">
 
                 <!-- ===== RISK GAUGE HERO ===== -->
                 <LinearLayout
@@ -85,20 +89,21 @@
                     android:background="@drawable/card_glass_bg"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="24dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="16dp">
+                    android:paddingTop="32dp"
+                    android:paddingBottom="24dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:elevation="8dp">
 
                     <!-- Circular gauge -->
                     <RelativeLayout
-                        android:layout_width="160dp"
-                        android:layout_height="160dp">
+                        android:layout_width="180dp"
+                        android:layout_height="180dp">
 
                         <ProgressBar
                             android:id="@+id/riskProgressBar"
                             style="?android:attr/progressBarStyleHorizontal"
-                            android:layout_width="160dp"
-                            android:layout_height="160dp"
+                            android:layout_width="180dp"
+                            android:layout_height="180dp"
                             android:layout_centerInParent="true"
                             android:max="100"
                             android:progress="0"
@@ -116,9 +121,9 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0%"
-                                android:textColor="@color/accent_green"
-                                android:textSize="36sp"
-                                android:textStyle="bold" />
+                                android:textColor="#FFFFFF"
+                                android:fontFamily="sans-serif-black"
+                                android:textSize="42sp" />
 
                             <TextView
                                 android:id="@+id/riskLabelText"
@@ -126,25 +131,29 @@
                                 android:layout_height="wrap_content"
                                 android:text="Risk Score"
                                 android:textColor="@color/text_muted"
-                                android:textSize="11sp" />
+                                android:fontFamily="sans-serif-medium"
+                                android:textSize="12sp"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.1" />
                         </LinearLayout>
                     </RelativeLayout>
 
-                    <!-- Divider -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginVertical="16dp"
-                        android:background="@color/bg_card_border" />
+                        android:layout_marginHorizontal="24dp"
+                        android:layout_marginVertical="20dp"
+                        android:background="#33FFFFFF" />
 
                     <!-- Current App -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="CURRENT ACTIVE APP"
-                        android:textColor="@color/text_muted"
-                        android:textSize="10sp"
-                        android:letterSpacing="0.1" />
+                        android:text="ACTIVE APP"
+                        android:textColor="@color/text_secondary"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.15" />
 
                     <TextView
                         android:id="@+id/currentAppText"
@@ -152,15 +161,16 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Waiting…"
-                        android:textColor="@color/accent_blue"
-                        android:textSize="20sp"
+                        android:textColor="#FFFFFF"
+                        android:textSize="22sp"
+                        android:fontFamily="sans-serif-medium"
                         android:textStyle="bold" />
 
                     <!-- Status + Trend -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="8dp"
                         android:gravity="center"
                         android:orientation="horizontal">
 
@@ -170,8 +180,8 @@
                             android:layout_height="wrap_content"
                             android:text="SAFE"
                             android:textColor="@color/accent_green"
-                            android:textSize="13sp"
-                            android:textStyle="bold" />
+                            android:textSize="14sp"
+                            android:fontFamily="sans-serif-black" />
 
                         <TextView
                             android:id="@+id/riskTrendText"
@@ -180,7 +190,8 @@
                             android:layout_marginStart="8dp"
                             android:text="→"
                             android:textColor="@color/text_muted"
-                            android:textSize="16sp" />
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/usageClassText"
@@ -188,11 +199,41 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
                             android:text="NEUTRAL"
-                            android:textColor="@color/text_muted"
+                            android:textColor="@color/text_primary"
                             android:textSize="11sp"
-                            android:background="@drawable/card_glass_bg"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="2dp" />
+                            android:fontFamily="sans-serif-medium"
+                            android:background="#1AFFFFFF"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- ===== MOST ADDICTED APPS ===== -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/card_glass_bg"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Top Addictive Apps Today"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp" />
+
+                    <LinearLayout
+                        android:id="@+id/topAppsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <!-- Instantiated via Java -->
                     </LinearLayout>
                 </LinearLayout>
 
@@ -201,10 +242,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="12dp">
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="16dp">
 
-                    <!-- Session Duration -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -212,8 +252,8 @@
                         android:background="@drawable/card_glass_bg"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="14dp"
-                        android:layout_marginEnd="6dp">
+                        android:padding="16dp"
+                        android:layout_marginEnd="8dp">
 
                         <TextView
                             android:id="@+id/sessionDurationText"
@@ -221,18 +261,18 @@
                             android:layout_height="wrap_content"
                             android:text="0m"
                             android:textColor="@color/accent_blue"
-                            android:textSize="20sp"
+                            android:textSize="22sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Session"
-                            android:textColor="@color/text_muted"
-                            android:textSize="10sp" />
+                            android:textColor="@color/text_secondary"
+                            android:fontFamily="sans-serif-medium"
+                            android:textSize="11sp" />
                     </LinearLayout>
 
-                    <!-- Interventions -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -240,8 +280,8 @@
                         android:background="@drawable/card_glass_bg"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="14dp"
-                        android:layout_marginHorizontal="6dp">
+                        android:padding="16dp"
+                        android:layout_marginStart="8dp">
 
                         <TextView
                             android:id="@+id/interventionsText"
@@ -249,41 +289,16 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textColor="@color/accent_amber"
-                            android:textSize="20sp"
+                            android:textSize="22sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Alerts"
-                            android:textColor="@color/text_muted"
-                            android:textSize="10sp" />
-                    </LinearLayout>
-
-                    <!-- Reward Level -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:background="@drawable/card_glass_bg"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="14dp"
-                        android:layout_marginStart="6dp">
-
-                        <TextView
-                            android:id="@+id/rewardLevelText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🌱"
-                            android:textSize="20sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tier"
-                            android:textColor="@color/text_muted"
-                            android:textSize="10sp" />
+                            android:textColor="@color/text_secondary"
+                            android:fontFamily="sans-serif-medium"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -293,9 +308,9 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/card_glass_bg"
                     android:orientation="vertical"
-                    android:padding="16dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="12dp">
+                    android:padding="20dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -307,9 +322,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="🔥 Streak"
-                            android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:text="Wellness Streak"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-medium"
                             android:textStyle="bold" />
 
                         <TextView
@@ -318,7 +334,7 @@
                             android:layout_height="wrap_content"
                             android:text="0 days"
                             android:textColor="@color/accent_amber"
-                            android:textSize="14sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 
@@ -326,32 +342,33 @@
                         android:id="@+id/streakMessageText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         android:text="Start your streak today!"
-                        android:textColor="@color/text_muted"
-                        android:textSize="12sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <!-- ===== ADVANCED METRICS ===== -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="28dp"
                     android:text="ADVANCED METRICS"
-                    android:textColor="@color/text_muted"
-                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerEnhancedDebug"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="12dp"
                     android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
-                    android:paddingHorizontal="16dp"
-                    android:paddingBottom="16dp" />
+                    android:paddingHorizontal="20dp"
+                    android:paddingBottom="24dp" />
 
             </LinearLayout>
         </ScrollView>
@@ -373,38 +390,39 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🛡️"
-                android:textSize="48sp"
+                android:textSize="56sp"
                 android:layout_marginBottom="16dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Usage Access Required"
-                android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="12dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="28dp"
                 android:gravity="center"
-                android:text="NeuroPulse needs usage access to monitor behavioral patterns and detect doomscrolling in real-time."
+                android:text="NeuroPulse needs usage access to monitor behavioral patterns and accurately detect high-risk doomscrolling in real-time."
                 android:textColor="@color/text_secondary"
-                android:textSize="14sp"
-                android:lineSpacingExtra="4dp" />
+                android:textSize="15sp"
+                android:lineSpacingExtra="6dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/permissionsBtn"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="56dp"
                 android:text="Grant Access"
-                android:textColor="@color/text_primary"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold"
+                android:textSize="16sp"
                 android:textAllCaps="false"
                 android:backgroundTint="@color/accent_blue"
-                app:cornerRadius="14dp" />
+                app:cornerRadius="16dp" />
         </LinearLayout>
 
     </FrameLayout>

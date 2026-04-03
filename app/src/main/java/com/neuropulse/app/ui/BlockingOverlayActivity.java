@@ -99,11 +99,12 @@ public class BlockingOverlayActivity extends Activity {
         };
         countDownTimer.start();
 
-        // Return button — goes to NeuroPulse main (not back to blocked app)
+        // Return button — strictly redirects to NeuroPulse Dashboard (positive redirection)
         btnReturn.setOnClickListener(v -> {
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+            finish();
         });
 
         // Rotate content every 30 seconds

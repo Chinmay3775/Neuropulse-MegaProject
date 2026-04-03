@@ -35,7 +35,7 @@
     </style>
 
     <!-- Glassmorphism card -->
-    <style name="Widget.Neuropulse.GlassCard">
+    <style name="Widget.Neuropulse.GlassCard" parent="">
         <item name="android:background">@drawable/card_glass_bg</item>
         <item name="android:padding">20dp</item>
         <item name="android:layout_margin">12dp</item>

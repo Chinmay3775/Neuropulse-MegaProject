@@ -14,23 +14,31 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.neuropulse.app.features.EnhancedFeatureExtractor;
+import com.neuropulse.app.features.ScrollTracker;
 import com.neuropulse.app.features.RealTimeAppDetector;
 import com.neuropulse.app.features.StreakManager;
 import com.neuropulse.app.features.UsageIntelligence;
 import com.neuropulse.app.ml.AddictionPredictor;
 import com.neuropulse.app.ml.RiskThresholds;
 import com.neuropulse.app.models.SessionFeatures;
-import com.neuropulse.app.ui.AlertActivity;
-import com.neuropulse.app.ui.BlockingOverlayActivity;
 import com.neuropulse.app.utils.AlertResponseTracker;
 
+/**
+ * Background foreground service for usage monitoring.
+ * Now uses OverlayManager for system-level interventions (overlays on top of any app)
+ * instead of launching Activity-based alerts.
+ *
+ * This service runs alongside NeuropulseAccessibilityService as a fallback,
+ * providing the foreground notification and continuous monitoring when
+ * the AccessibilityService is not enabled.
+ */
 public class UsageMonitorService extends Service {
 
     private static final String TAG = "UsageMonitorService";
     private static final String CHANNEL_ID = "neuropulse_monitor";
     private static final int NOTIF_ID = 101;
 
-    private static final long CHECK_INTERVAL_MS = 2000L; // Check every 2 seconds
+    private static final long CHECK_INTERVAL_MS = 2000L;
 
     private Handler handler;
     private Runnable monitorRunnable;
@@ -41,15 +49,24 @@ public class UsageMonitorService extends Service {
     private AlertResponseTracker alertTracker;
     private CooldownManager cooldownManager;
     private StreakManager streakManager;
+    private OverlayManager overlayManager;
 
     private String currentPackage = null;
     private long sessionStartTime = 0L;
-    
+
     // Risk persistence
     private float persistedRisk = 0f;
     private long lastAppExitTime = 0L;
     private long lastAlertTime = 0L;
     private int previousCategory = -1;
+
+    // Notification state
+    private String lastNotificationTitle = null;
+    private String lastNotificationContent = null;
+    private long lastNotificationTime = 0L;
+
+    // ML Pacing
+    private long lastMLPredictionTime = 0L;
 
     @Override
     public void onCreate() {
@@ -66,8 +83,17 @@ public class UsageMonitorService extends Service {
         alertTracker = new AlertResponseTracker(this);
         cooldownManager = new CooldownManager(this);
         streakManager = new StreakManager(this);
+        overlayManager = new OverlayManager(this);
 
-        startMonitoringLoop();
+        // Only start the polling loop if AccessibilityService is NOT running
+        // (AccessibilityService handles monitoring more efficiently via events)
+        if (!NeuropulseAccessibilityService.isServiceRunning()) {
+            startMonitoringLoop();
+        } else {
+            Log.i(TAG, "AccessibilityService is active — skipping polling loop");
+            stopForeground(true);
+            stopSelf();
+        }
     }
 
     @Override
@@ -84,6 +110,9 @@ public class UsageMonitorService extends Service {
         if (predictor != null) {
             predictor.close();
         }
+        if (overlayManager != null) {
+            overlayManager.dismissAll();
+        }
     }
 
     @Override
@@ -91,16 +120,29 @@ public class UsageMonitorService extends Service {
         return null;
     }
 
+    // Monitoring state
+    private boolean isMonitoring = false;
+
     // ================= CORE MONITORING LOOP =================
 
     private void startMonitoringLoop() {
         monitorRunnable = () -> {
+            if (isMonitoring) return;
+            isMonitoring = true;
+
             try {
+                if (NeuropulseAccessibilityService.isServiceRunning()) {
+                    Log.i(TAG, "AccessibilityService now active — stopping poll loop");
+                    stopForeground(true);
+                    stopSelf();
+                    isMonitoring = false;
+                    return;
+                }
+
                 RealTimeAppDetector.CurrentAppInfo app = appDetector.getCurrentAppWithRisk();
 
                 if (app == null || app.packageName.equals("unknown")) {
                     decayRisk();
-                    reschedule();
                     return;
                 }
 
@@ -110,8 +152,9 @@ public class UsageMonitorService extends Service {
                 if (cooldownManager.isInCooldown(app.packageName) || cooldownManager.isCategoryBlocked(app.category)) {
                     showBlockingOverlay(app.packageName);
                     decayRisk();
-                    reschedule();
                     return;
+                } else if (overlayManager.isBlockingShowing()) {
+                    overlayManager.dismissBlockingOverlay();
                 }
 
                 // 2. Handle App Transition
@@ -121,87 +164,100 @@ public class UsageMonitorService extends Service {
                     }
                     currentPackage = app.packageName;
                     sessionStartTime = now;
+                    
+                    if (overlayManager.isBlockingShowing()) {
+                        overlayManager.dismissBlockingOverlay();
+                    }
+                    if (overlayManager.isAlertShowing()) {
+                        overlayManager.dismissAlertOverlay();
+                    }
+
                     featureExtractor.recordSession();
+                    predictor.resetHistory();
+                    lastMLPredictionTime = 0;
+                    ScrollTracker.getInstance().onAppTransition();
                 }
 
-                // 3. Extract Features & Predict
-                SessionFeatures features = featureExtractor.extract(app.category, sessionStartTime, now);
-                AddictionPredictor.PredictionResult result = predictor.predict(features);
+                // 3. Paced ML Inference (every ~25s)
+                if (now - lastMLPredictionTime >= RiskThresholds.ML_PREDICTION_INTERVAL_MS) {
+                    lastMLPredictionTime = now;
 
-                // 4. Update Risk State (Contextual)
-                float currentAppRisk = result.dopamineRisk;
-                currentAppRisk = UsageIntelligence.adjustRiskForContext(currentAppRisk, previousCategory, app.category);
-                
-                // Track trend
-                featureExtractor.recordRisk(currentAppRisk);
+                    java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newSingleThreadExecutor();
+                    executor.execute(() -> {
+                        SessionFeatures features = featureExtractor.extract(app.category, sessionStartTime, now);
+                        AddictionPredictor.PredictionResult result = predictor.predict(features);
 
-                // Update persistent risk
-                long timeSinceExit = now - lastAppExitTime;
-                if (timeSinceExit <= 30000) { // 30s window to resume risk level
-                    persistedRisk = Math.max(persistedRisk, currentAppRisk);
-                } else if (!RiskThresholds.isHighStimCategory(app.category) && UsageIntelligence.isProductivePackage(app.packageName)) {
-                   // Faster decay for productive apps
-                   persistedRisk = Math.max(0f, persistedRisk - 0.05f); 
+                        handler.post(() -> {
+                            if (!app.packageName.equals(currentPackage)) {
+                                return;
+                            }
+                            
+                            float currentAppRisk = result.dopamineRisk;
+                            persistedRisk = UsageIntelligence.adjustRiskForContext(currentAppRisk, previousCategory, app.category);
+                            featureExtractor.recordRisk(persistedRisk);
+
+                            long timeSinceExit = now - lastAppExitTime;
+                            if (timeSinceExit <= 30000 && lastAppExitTime > 0) {
+                                persistedRisk = Math.max(persistedRisk, currentAppRisk);
+                            }
+
+                            previousCategory = app.category;
+                            evaluateIntervention(app, features, result);
+                        });
+                    });
                 } else {
-                   // Normal decay
-                   persistedRisk = Math.max(0f, persistedRisk - 0.02f);
+                    updateNotification(app.displayName, RiskThresholds.getRiskLevel(persistedRisk) + " Risk", false);
                 }
-                persistedRisk = Math.max(persistedRisk, currentAppRisk); // Floor to current
-                previousCategory = app.category;
-
-                // 5. Evaluate Alert & Escalation Logic
-                evaluateIntervention(app, features, result);
 
             } catch (Exception e) {
                 Log.e(TAG, "Error in monitoring loop", e);
             } finally {
+                isMonitoring = false;
                 reschedule();
             }
         };
 
         handler.post(monitorRunnable);
     }
-    
+
     private void decayRisk() {
         persistedRisk = Math.max(0f, persistedRisk - 0.02f);
     }
 
     private void reschedule() {
-        handler.postDelayed(monitorRunnable, CHECK_INTERVAL_MS);
+        handler.postDelayed(monitorRunnable, RiskThresholds.MONITOR_INTERVAL_MS);
     }
 
     // ================= INTERVENTION LOGIC =================
-    
-    private void evaluateIntervention(RealTimeAppDetector.CurrentAppInfo app, SessionFeatures features, AddictionPredictor.PredictionResult result) {
-        
-        // Check if we should suppress the alert (e.g., productive app)
+
+    private void evaluateIntervention(RealTimeAppDetector.CurrentAppInfo app, SessionFeatures features,
+            AddictionPredictor.PredictionResult result) {
+
         if (UsageIntelligence.shouldSuppressAlert(app.packageName, app.category, persistedRisk)) {
             updateNotification(app.displayName, "Productive Session", false);
             return;
         }
 
-        // Check if alert threshold met
         if (persistedRisk >= RiskThresholds.ALERT_THRESHOLD) {
-            
-            // Record high risk session for streaks
+
             if (persistedRisk >= RiskThresholds.HIGH_RISK) {
                 streakManager.recordHighRiskSession();
             }
 
             long now = System.currentTimeMillis();
             if (now - lastAlertTime > RiskThresholds.ALERT_COOLDOWN_MS) {
-                
-                // Escalate to block?
+
+                if (overlayManager.isAlertShowing()) return;
+
                 if (alertTracker.shouldEscalate()) {
                     Log.i(TAG, "Escalating to cooldown: " + alertTracker.getConsecutiveContinueCount() + " continues");
                     cooldownManager.startCooldown(app.packageName, app.category, persistedRisk, features.sessionCount);
                     alertTracker.resetOnBreak();
                     showBlockingOverlay(app.packageName);
                 } else {
-                    // Show standard alert
-                    Log.i(TAG, "Triggering Alert for: " + app.packageName + " Risk: " + persistedRisk);
+                    Log.i(TAG, "Triggering Overlay Alert for: " + app.packageName + " Risk: " + persistedRisk);
                     lastAlertTime = now;
-                    showAlert(app.displayName, (int)(features.sessionDurationMs / 60000), persistedRisk, result.reason);
+                    showAlert(app, features, result);
                 }
                 updateNotification(app.displayName, "Take a break!", true);
             } else {
@@ -212,59 +268,71 @@ public class UsageMonitorService extends Service {
         }
     }
 
-    // ================= UI NAVIGATION =================
+    // ================= OVERLAY-BASED INTERVENTIONS =================
 
-    private void showAlert(String appName, int durationMin, float risk, String reason) {
-        Intent intent = new Intent(this, AlertActivity.class);
-        intent.putExtra(AlertActivity.EXTRA_APP_NAME, appName);
-        intent.putExtra(AlertActivity.EXTRA_DURATION_MIN, durationMin);
-        intent.putExtra(AlertActivity.EXTRA_RISK, risk);
-        intent.putExtra(AlertActivity.EXTRA_REASON, reason);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        
-        final String finalPackageName = currentPackage;
-        final int finalCategory = previousCategory;
+    private void showAlert(RealTimeAppDetector.CurrentAppInfo app, SessionFeatures features,
+                           AddictionPredictor.PredictionResult result) {
 
-        // Setup the callback
-        AlertActivity.callback = new AlertActivity.AlertCallback() {
-            @Override
-            public void onTakeBreak() {
-                // User chose break - start a short cooldown
-                if (finalPackageName != null) {
-                    cooldownManager.startCooldown(finalPackageName, finalCategory, risk, 1);
-                    showBlockingOverlay(finalPackageName);
+        final String pkgName = app.packageName;
+        final int category = app.category;
+
+        overlayManager.showAlertOverlay(
+                app.displayName,
+                (int) (features.sessionDurationMs / 60000),
+                persistedRisk,
+                result.reason,
+                pkgName, category,
+                new OverlayManager.AlertActionCallback() {
+                    @Override
+                    public void onTakeBreak(String packageName, int cat, float risk) {
+                        cooldownManager.startCooldown(packageName, cat, risk, 1);
+                        showBlockingOverlay(packageName);
+                    }
+
+                    @Override
+                    public void onContinue(String packageName, int cat, float risk) {
+                        if (alertTracker.shouldEscalate()) {
+                            Log.i(TAG, "Escalating on 3rd continue for: " + packageName);
+                            cooldownManager.startCooldown(packageName, cat, risk, 5);
+                            showBlockingOverlay(packageName);
+                        }
+                    }
+
+                    @Override
+                    public void onAlertDismissed() {
+                        // Ignored alert — escalation tracker handles it
+                    }
                 }
-            }
-
-            @Override
-            public void onContinue() {
-                // Do nothing
-            }
-        };
-        
-        startActivity(intent);
+        );
     }
 
     private void showBlockingOverlay(String packageName) {
         long durationMs = cooldownManager.getGlobalCooldownRemainingMs();
         if (durationMs <= 0) {
-           durationMs = cooldownManager.getCooldownRemainingMs(packageName);
+            durationMs = cooldownManager.getCooldownRemainingMs(packageName);
         }
-        if (durationMs <= 0) return; // safeguard
+        if (durationMs <= 0) return;
 
-        Intent intent = new Intent(this, BlockingOverlayActivity.class);
-        intent.putExtra(BlockingOverlayActivity.EXTRA_APP_NAME, packageName);
-        intent.putExtra(BlockingOverlayActivity.EXTRA_DURATION_MS, durationMs);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
+        overlayManager.showBlockingOverlay(durationMs);
     }
 
     // ================= NOTIFICATION =================
 
     private void updateNotification(String appName, String status, boolean isAlert) {
-        String title = isAlert ? "⚠️ High Risk Detected" : "Neuropulse Active";
-        String content = appName + " - " + status;
-        
+        long now = System.currentTimeMillis();
+        String title = isAlert ? "⚠️ Dopamine Spike Detected" : "NeuroPulse: Monitoring";
+        String content = appName + " | " + status;
+
+        boolean contentChanged = !title.equals(lastNotificationTitle) || !content.equals(lastNotificationContent);
+        boolean isCooldownOver = (now - lastNotificationTime >= 5000L);
+
+        if (!contentChanged && !isAlert) return;
+        if (!isCooldownOver && !isAlert && contentChanged) return;
+
+        lastNotificationTitle = title;
+        lastNotificationContent = content;
+        lastNotificationTime = now;
+
         Notification notification = buildNotification(title, content);
 
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

@@ -1332,8 +1332,14 @@ color abc_tint_edittext
 color abc_tint_seek_thumb
 color abc_tint_spinner
 color abc_tint_switch_track
+color accent_amber
+color accent_blue
+color accent_cyan
+color accent_green
 color accent_material_dark
 color accent_material_light
+color accent_purple
+color accent_red
 color androidx_core_ripple_material_light
 color androidx_core_secondary_text_default_material_light
 color background_floating_material_dark
@@ -1341,6 +1347,11 @@ color background_floating_material_light
 color background_light
 color background_material_dark
 color background_material_light
+color bg_card
+color bg_card_border
+color bg_elevated
+color bg_primary
+color bg_surface
 color black
 color bright_foreground_disabled_material_dark
 color bright_foreground_disabled_material_light
@@ -1350,6 +1361,9 @@ color bright_foreground_material_dark
 color bright_foreground_material_light
 color button_material_dark
 color button_material_light
+color calming_accent
+color calming_bg
+color calming_glow
 color cardview_dark_background
 color cardview_light_background
 color cardview_shadow_end_color
@@ -2044,6 +2058,9 @@ color purple_700
 color red
 color ripple_material_dark
 color ripple_material_light
+color risk_high
+color risk_low
+color risk_medium
 color secondary_text_default_material_dark
 color secondary_text_default_material_light
 color secondary_text_disabled_material_dark
@@ -2056,6 +2073,9 @@ color switch_thumb_normal_material_dark
 color switch_thumb_normal_material_light
 color teal_200
 color teal_700
+color text_muted
+color text_primary
+color text_secondary
 color tooltip_background_dark
 color tooltip_background_light
 color white
@@ -2913,8 +2933,11 @@ drawable abc_textfield_search_activated_mtrl_alpha
 drawable abc_textfield_search_default_mtrl_alpha
 drawable abc_textfield_search_material
 drawable abc_vector_test
+drawable alert_bg
 drawable avd_hide_password
 drawable avd_show_password
+drawable bg_premium_gradient
+drawable breathing_circle
 drawable btn_checkbox_checked_mtrl
 drawable btn_checkbox_checked_to_unchecked_mtrl_animation
 drawable btn_checkbox_unchecked_mtrl
@@ -2923,6 +2946,8 @@ drawable btn_radio_off_mtrl
 drawable btn_radio_off_to_on_mtrl_animation
 drawable btn_radio_on_mtrl
 drawable btn_radio_on_to_off_mtrl_animation
+drawable button_primary
+drawable card_glass_bg
 drawable circular_progress
 drawable design_fab_background
 drawable design_ic_visibility
@@ -2963,6 +2988,7 @@ drawable material_ic_keyboard_arrow_previous_black_24dp
 drawable material_ic_keyboard_arrow_right_black_24dp
 drawable material_ic_menu_arrow_down_black_24dp
 drawable material_ic_menu_arrow_up_black_24dp
+drawable metric_card_bg
 drawable mtrl_bottomsheet_drag_handle
 drawable mtrl_checkbox_button
 drawable mtrl_checkbox_button_checked_unchecked
@@ -3013,6 +3039,7 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable overlay_alert_bg
 drawable test_level_drawable
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
@@ -3087,6 +3114,9 @@ id action_text
 id actions
 id activity_chooser_view_content
 id add
+id alertAppInfo
+id alertReason
+id alertSuggestion
 id alertTitle
 id aligned
 id all
@@ -3114,6 +3144,12 @@ id bounce
 id bounceBoth
 id bounceEnd
 id bounceStart
+id breathingCircle
+id breathingInstructions
+id breathingTitle
+id btnContinue
+id btnReturnToApp
+id btnTakeBreak
 id buttonPanel
 id cache_measures
 id callMeasure
@@ -3145,6 +3181,8 @@ id content
 id contentPanel
 id contiguous
 id continuousVelocity
+id cooldownProgress
+id cooldownTimer
 id coordinator
 id cos
 id counterclockwise
@@ -3196,6 +3234,7 @@ id end
 id endToStart
 id enterAlways
 id enterAlwaysCollapsed
+id escalationWarning
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
@@ -3239,8 +3278,10 @@ id image
 id immediateStop
 id included
 id indeterminate
+id indicatorStrip
 id info
 id instructionText
+id interventionsText
 id invisible
 id inward
 id is_pooling_container_tag
@@ -3342,6 +3383,22 @@ id onInterceptTouchReturnSwipe
 id openSettingsBtn
 id outline
 id outward
+id overlayAlertAppInfo
+id overlayAlertReason
+id overlayAlertSuggestion
+id overlayAlertTitle
+id overlayBreathingCircle
+id overlayBreathingInstructions
+id overlayBreathingTitle
+id overlayBtnContinue
+id overlayBtnOpenNeuropulse
+id overlayBtnTakeBreak
+id overlayCooldownProgress
+id overlayCooldownTimer
+id overlayEscalationWarning
+id overlayQuoteText
+id overlayRiskBar
+id overlaySuggestionText
 id overshoot
 id packed
 id parallax
@@ -3363,6 +3420,7 @@ id postLayout
 id pressed
 id progress_circular
 id progress_horizontal
+id quoteText
 id radio
 id ratio
 id recheckBtn
@@ -3373,9 +3431,12 @@ id right
 id rightToLeft
 id right_icon
 id right_side
+id riskIndicatorBar
+id riskLabelText
 id riskLevelText
 id riskProgressBar
 id riskScoreText
+id riskTrendText
 id rounded
 id row_index_key
 id save_non_transition_alpha
@@ -3415,6 +3476,7 @@ id search_voice_btn
 id select_dialog_listview
 id selected
 id selection_type
+id sessionDurationText
 id sharedValueSet
 id sharedValueUnset
 id shortcut
@@ -3449,9 +3511,13 @@ id startVertical
 id staticLayout
 id staticPostLayout
 id stop
+id streakBadge
+id streakCountText
+id streakMessageText
 id stretch
 id submenuarrow
 id submit_area
+id suggestionText
 id supportScrollUp
 id tabMode
 id tag_accessibility_actions
@@ -3491,6 +3557,7 @@ id titleDividerNoCustom
 id title_template
 id toggle
 id top
+id topAppsContainer
 id topPanel
 id touch_outside
 id transitionToEnd
@@ -3505,6 +3572,7 @@ id unchecked
 id uniform
 id unlabeled
 id up
+id usageClassText
 id useLogo
 id vertical_only
 id view_offset_helper
@@ -3637,6 +3705,8 @@ layout abc_search_dropdown_item_icons_2line
 layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
+layout activity_alert
+layout activity_blocking_overlay
 layout activity_main
 layout activity_permission_helper
 layout custom_dialog
@@ -3713,6 +3783,8 @@ layout notification_template_custom_big
 layout notification_template_icon_group
 layout notification_template_part_chronometer
 layout notification_template_part_time
+layout overlay_alert
+layout overlay_blocking
 layout select_dialog_item_material
 layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
@@ -3748,6 +3820,7 @@ string abc_searchview_description_voice
 string abc_shareactionprovider_share_with
 string abc_shareactionprovider_share_with_application
 string abc_toolbar_collapse_description
+string accessibility_service_description
 string androidx_startup
 string app_name
 string appbar_scrolling_view_behavior
@@ -4519,6 +4592,8 @@ style Theme_MaterialComponents_Light_NoActionBar_Bridge
 style Theme_MaterialComponents_NoActionBar
 style Theme_MaterialComponents_NoActionBar_Bridge
 style Theme_Neuropulse
+style Theme_Neuropulse_Alert
+style Theme_Neuropulse_Blocking
 style ThemeOverlay_AppCompat
 style ThemeOverlay_AppCompat_ActionBar
 style ThemeOverlay_AppCompat_Dark
@@ -5003,6 +5078,9 @@ style Widget_MaterialComponents_Toolbar_Primary
 style Widget_MaterialComponents_Toolbar_PrimarySurface
 style Widget_MaterialComponents_Toolbar_Surface
 style Widget_MaterialComponents_Tooltip
+style Widget_Neuropulse_Button
+style Widget_Neuropulse_Button_Danger
+style Widget_Neuropulse_GlassCard
 style Widget_Neuropulse_OutlinedButton
 style Widget_Support_CoordinatorLayout
 styleable ActionBar background backgroundSplit backgroundStacked contentInsetEnd contentInsetEndWithActions contentInsetLeft contentInsetRight contentInsetStart contentInsetStartWithNavigation customNavigationLayout displayOptions divider elevation height hideOnContentScroll homeAsUpIndicator homeLayout icon indeterminateProgressStyle itemPadding logo navigationMode popupTheme progressBarPadding progressBarStyle subtitle subtitleTextStyle title titleTextStyle
@@ -5158,3 +5236,4 @@ styleable ViewPager2 android_orientation
 styleable ViewStubCompat android_id android_layout android_inflatedId
 styleable ViewTransition android_id SharedValue SharedValueId clearsTag duration ifTagNotSet ifTagSet motionInterpolator motionTarget onStateTransition pathMotionArc setsTag transitionDisable upDuration viewTransitionMode
 styleable include constraintSet
+xml accessibility_service_config

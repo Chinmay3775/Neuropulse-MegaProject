@@ -4,6 +4,7 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import com.neuropulse.app.ml.RiskThresholds;
 import com.neuropulse.app.models.SessionFeatures;
@@ -12,7 +13,13 @@ import java.util.Calendar;
 
 /**
  * Feature extractor — converts live app usage into ML-ready features.
- * Removes synthetic scroll estimation; uses duration-based intensity instead.
+ *
+ * Now uses REAL scroll data from {@link ScrollTracker} (populated by the
+ * AccessibilityService capturing TYPE_VIEW_SCROLLED events) instead of
+ * the old synthetic duration-based intensity estimates.
+ *
+ * Falls back to category-based estimates only when the AccessibilityService
+ * is not running (i.e., ScrollTracker has no data).
  */
 public class EnhancedFeatureExtractor {
 
@@ -43,8 +50,8 @@ public class EnhancedFeatureExtractor {
     ) {
         long durationMs = Math.max(0, currentTime - sessionStartTime);
 
-        // Duration-based interaction intensity (replaces fake estimateScrollRate)
-        float interactionIntensity = computeInteractionIntensity(appCategory, durationMs);
+        // Use REAL scroll data from ScrollTracker, falling back to synthetic estimate
+        float scrollsPerMinute = getScrollsPerMinute(appCategory, durationMs);
         int consecutiveSameAppMin = (int) (durationMs / 60000L);
         int bingeFlag = durationMs > (2 * 60 * 60 * 1000L) ? 1 : 0;
         float timeOfDay = calculateTimeOfDay(currentTime);
@@ -52,7 +59,7 @@ public class EnhancedFeatureExtractor {
         SessionFeatures features = new SessionFeatures(
                 appCategory,
                 durationMs,
-                interactionIntensity,
+                scrollsPerMinute,
                 consecutiveSameAppMin,
                 timeOfDay,
                 bingeFlag
@@ -69,20 +76,42 @@ public class EnhancedFeatureExtractor {
         features.sessionCount = getSessionCountToday();
         features.riskTrend = computeRiskTrend();
 
+        // NEW: Populate authentic scroll cadence metrics from ScrollTracker
+        ScrollTracker tracker = ScrollTracker.getInstance();
+        features.scrollCadenceVariance = tracker.getScrollCadenceVariance();
+        features.rapidBurstCount = tracker.getRapidBurstCount();
+
         return features;
     }
 
-    // ================= INTERACTION INTENSITY =================
+    // ================= SCROLL DATA (REAL + FALLBACK) =================
+
     /**
-     * Computes interaction intensity based on app category and session duration.
-     * Higher for addictive categories, scales with time spent.
-     * This replaces the old estimateScrollRate which fabricated fake data.
+     * Returns scrolls-per-minute using real data from ScrollTracker.
+     * Falls back to a category-based synthetic estimate only when
+     * the AccessibilityService hasn't recorded any scroll events yet.
      */
-    private float computeInteractionIntensity(int category, long durationMs) {
-        // Base interaction rate by category (interactions per minute)
+    private float getScrollsPerMinute(int category, long durationMs) {
+        ScrollTracker tracker = ScrollTracker.getInstance();
+        float realScrollRate = tracker.getScrollsPerMinute();
+
+        // If we have real data (at least a few events), use it
+        if (tracker.getWindowEventCount() >= 2) {
+            return realScrollRate;
+        }
+
+        // Fallback: category-based estimate (used when AccessibilityService
+        // is not enabled or session just started with no scrolls yet)
+        return computeFallbackIntensity(category, durationMs);
+    }
+
+    /**
+     * Legacy fallback: estimates interaction intensity from category and duration.
+     * Used only when real scroll data is unavailable.
+     */
+    private float computeFallbackIntensity(int category, long durationMs) {
         float baseRate;
         if (RiskThresholds.isHighStimCategory(category)) {
-            // Social/entertainment/games have high natural interaction rates
             baseRate = category == RiskThresholds.CATEGORY_SOCIAL ? 14f :
                     category == RiskThresholds.CATEGORY_ENTERTAINMENT ? 10f : 8f;
         } else if (category == RiskThresholds.CATEGORY_NEWS) {
@@ -94,12 +123,11 @@ public class EnhancedFeatureExtractor {
         }
 
         // Engagement escalation: longer sessions = higher intensity
-        // Uses a log curve that saturates — models the "getting hooked" effect
         float durationMinutes = durationMs / 60000f;
         float engagementMultiplier = 1f + (float) (0.5 * Math.log1p(durationMinutes / 10.0));
         engagementMultiplier = Math.min(engagementMultiplier, 2.5f);
 
-        // Add time-of-day modifier (people scroll faster at night)
+        // Time-of-day modifier (people scroll faster at night)
         float hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         float timeModifier = (hour >= 22 || hour <= 5) ? 1.2f : 1.0f;
 
@@ -108,8 +136,7 @@ public class EnhancedFeatureExtractor {
 
     // ================= CONTEXT ESTIMATES =================
     private int getUnlockEstimate(long durationMs) {
-        // Estimate from session duration — rough proxy
-        int base = (int) (durationMs / (15 * 60000L)); // ~1 unlock per 15 min
+        int base = (int) (durationMs / (15 * 60000L));
         return Math.max(1, base + 1);
     }
 
@@ -167,7 +194,6 @@ public class EnhancedFeatureExtractor {
     private float computeRiskTrend() {
         if (riskCount < 3) return 0f;
 
-        // Compare average of last 3 vs previous 3
         float recent = 0f, older = 0f;
         int n = Math.min(riskCount, recentRisks.length);
         int half = n / 2;
@@ -185,9 +211,9 @@ public class EnhancedFeatureExtractor {
         older /= (n - half);
 
         float diff = recent - older;
-        if (diff > 0.05f) return 1f;  // rising
-        if (diff < -0.05f) return -1f; // falling
-        return 0f; // stable
+        if (diff > 0.05f) return 1f;
+        if (diff < -0.05f) return -1f;
+        return 0f;
     }
 
     // ================= HELPERS =================
@@ -208,3 +234,4 @@ public class EnhancedFeatureExtractor {
         }
     }
 }
+

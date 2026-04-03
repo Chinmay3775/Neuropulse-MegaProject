@@ -7,4 +7,5 @@
     <string name="status_monitoring">Status: Monitoring…</string>
     <string name="last_spike">Last Spike: None</string>
     <string name="notification_listener_service">Notification Listener Service</string>
+    <string name="accessibility_service_description">NeuroPulse uses this service to detect which app you are currently using and provide real-time digital wellness interventions. It monitors app transitions to help you stay mindful of your screen time.</string>
 </resources>
